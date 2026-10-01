@@ -1,0 +1,146 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  password_hash String
+  totp_secret   String?
+  role          Role
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+  assets        Asset[]
+}
+
+enum ConfirmationMode {
+  SIMPLE
+  CODE
+  TICKET
+}
+
+model FormConfig {
+  id              String           @id @default(uuid()) @db.Uuid
+  form_identifier String           @unique
+  is_active       Boolean          @default(false)
+  is_listed       Boolean          @default(true)
+  public_password String?
+  confirmation_mode ConfirmationMode @default(SIMPLE)
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  deleted_at      DateTime?
+}
+
+model Asset {
+  id            String    @id @default(uuid()) @db.Uuid
+  original_name String
+  mime_type     String
+  size_bytes    Int
+  uploaded_by   String?   @db.Uuid
+  user          User?     @relation(fields: [uploaded_by], references: [id])
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+}
+
+enum ViewType {
+  TABLE
+  CHART
+}
+
+model CustomView {
+  id              String    @id @default(uuid()) @db.Uuid
+  name            String
+  type            ViewType
+  configuration   Json
+  is_public       Boolean   @default(false)
+  public_password String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+}
+
+enum ActivityType {
+  HORA_DEL_CUENTO
+  CIRCULO_DE_LECTURA
+  TALLER
+}
+
+enum Gender {
+  H
+  M
+}
+
+enum Occupation {
+  HOGAR
+  ESTUDIANTE
+  TRABAJADOR
+  JUBILADO
+  DESOCUPADO
+}
+
+enum EducationLevel {
+  PREESCOLAR
+  PRIMARIA
+  SECUNDARIA
+  BACHILLERATO
+  LICENCIATURA
+  POSGRADO
+}
+
+enum ContactRelation {
+  PADRE
+  MADRE
+  TUTOR
+  OTRO_FAMILIAR
+  OTRO
+}
+
+model EventRegistration {
+  id String @id @default(uuid()) @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+
+  // Información General
+  activity ActivityType
+  activity_date DateTime
+
+  // Información del Participante
+  participant_name String
+  participant_birthdate DateTime
+  participant_gender Gender
+  participant_email String?
+  participant_phone String?
+  participant_neighborhood String?
+  participant_occupation Occupation
+  participant_education EducationLevel
+  needs_disability_support Boolean
+  has_library_loan_record Boolean
+
+  // Información de Contacto
+  contact1_name String?
+  contact1_email String?
+  contact1_phone String?
+  contact1_relation ContactRelation?
+
+  // Información de Segundo Contacto
+  contact2_name String?
+  contact2_email String?
+  contact2_phone String?
+  contact2_relation ContactRelation?
+
+  // Autorización e Indicaciones
+  accepts_image_usage Boolean
+}

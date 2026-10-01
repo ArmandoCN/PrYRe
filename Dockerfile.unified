@@ -1,0 +1,29 @@
+FROM node:20-bookworm-slim AS frontend-build
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+# Build the React app (will output to /app/dist)
+RUN npm run build
+
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+# Install OpenSSL for Prisma on Debian
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+# Copy backend package.json and install
+COPY backend/package*.json ./
+RUN npm install
+
+# Copy backend source
+COPY backend/ ./
+RUN npx prisma generate
+
+# Copy built frontend from previous stage
+COPY --from=frontend-build /app/dist /app/frontend/dist
+
+EXPOSE 3000
+
+# Push DB changes and start server
+CMD npx prisma db push --accept-data-loss && npm start
