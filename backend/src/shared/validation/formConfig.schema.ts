@@ -6,7 +6,7 @@ export const updateFormConfigSchema = z.object({
   public_password: z.string().nullable().optional(),
   confirmation_mode: z.enum(['SIMPLE', 'CODE', 'TICKET']).optional(),
   max_submissions: z.number().int().min(1).nullable().optional(),
-  folio_strategy: z.enum(['CONSECUTIVE', 'DATE_PREFIX', 'RANDOM_CHECKSUM']).optional()
+  folio_strategy: z.enum(['CONSECUTIVE', 'PREFIX_DATE_CONSECUTIVE', 'RANDOM_CHECKSUM']).optional()
 }).refine(data => 
   data.is_active !== undefined || 
   data.public_password !== undefined || 

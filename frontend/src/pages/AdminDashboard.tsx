@@ -209,7 +209,7 @@ export function AdminDashboard() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="CONSECUTIVE">Consecutivo Numérico (1, 2, 3...)</SelectItem>
-                      <SelectItem value="DATE_PREFIX">Prefijo + Fecha (EJ: 2410-001)</SelectItem>
+                      <SelectItem value="PREFIX_DATE_CONSECUTIVE">Prefijo + Fecha (EJ: 2410-001)</SelectItem>
                       <SelectItem value="RANDOM_CHECKSUM">Alfanumérico Seguro (EJ: X9P2K)</SelectItem>
                     </SelectContent>
                   </Select>
