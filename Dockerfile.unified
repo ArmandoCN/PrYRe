@@ -25,5 +25,5 @@ COPY --from=frontend-build /app/dist /app/frontend/dist
 
 EXPOSE 3000
 
-# Push DB changes and start server
-CMD npx prisma db push --accept-data-loss && npm start
+# Push DB changes, seed data, and start server
+CMD npx prisma db push --accept-data-loss && node backend/seed.js && npm start
