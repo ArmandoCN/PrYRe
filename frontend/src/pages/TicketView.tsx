@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export function TicketView() {
   const [searchParams] = useSearchParams();
-  const code = searchParams.get('code') || 'N/A';
+  const folio = searchParams.get('folio') || searchParams.get('code') || 'N/A';
   const navigate = useNavigate();
 
   return (
@@ -19,7 +19,7 @@ export function TicketView() {
             <div className="space-y-2">
               <p className="text-xl text-muted-foreground">Tu folio oficial de validación es:</p>
               <p className="text-5xl font-mono font-black tracking-widest bg-muted/50 p-4 rounded-lg border">
-                {code}
+                {folio}
               </p>
             </div>
             

@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
 export function EventRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +30,12 @@ export function EventRegistrationForm() {
   const [passwordProvided, setPasswordProvided] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [confirmationMode, setConfirmationMode] = useState<'SIMPLE' | 'CODE' | 'TICKET'>('SIMPLE');
+
+  // Novedades: Reservas y Folios Reales
+  const [reservationToken, setReservationToken] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+  const [isSoldOut, setIsSoldOut] = useState(false);
+  const [finalFolio, setFinalFolio] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -48,6 +54,28 @@ export function EventRegistrationForm() {
     };
     fetchConfig();
   }, []);
+
+  // Sistema de Reserva de Cupo (Dispara cuando el form está abierto y desbloqueado)
+  useEffect(() => {
+    if (configLoading || !isActive || (requiresPassword && !passwordProvided)) return;
+    if (isSoldOut || reservationToken) return; // Prevent double firing
+
+    const reserveSpot = async () => {
+      try {
+        const response = await axios.post('/api/forms/EventRegistration/reserve');
+        if (response.data.success) {
+          setReservationToken(response.data.data.reservation_token);
+          setExpiresAt(new Date(response.data.data.expires_at));
+        }
+      } catch (err: any) {
+        if (err.response?.data?.error?.code === 'LIMIT_REACHED') {
+          setIsSoldOut(true);
+        }
+      }
+    };
+
+    reserveSpot();
+  }, [configLoading, isActive, requiresPassword, passwordProvided, isSoldOut, reservationToken]);
 
   const form = useForm<any>({
     resolver: zodResolver(eventRegistrationSchema),
@@ -86,14 +114,22 @@ export function EventRegistrationForm() {
         participant_birthdate: new Date(data.participant_birthdate).toISOString()
       };
 
-      await axios.post('/api/forms/EventRegistration/submissions', { 
+      const res = await axios.post('/api/forms/EventRegistration/submissions', { 
         data: payloadData, 
-        public_password: passwordProvided 
+        public_password: passwordProvided,
+        reservation_token: reservationToken
       });
+      
+      setFinalFolio(res.data.data.folio);
       setSuccess(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Error al enviar el formulario. Verifica tus datos o contacta al administrador.');
+      const msg = error.response?.data?.error?.message;
+      if (msg === 'RESERVATION_EXPIRED') {
+        alert('Tu tiempo de reserva ha expirado. Por favor, recarga la página para intentar de nuevo.');
+      } else {
+        alert('Error al enviar el formulario. Verifica tus datos o contacta al administrador.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -111,6 +147,25 @@ export function EventRegistrationForm() {
             <CardTitle>Formulario Cerrado</CardTitle>
             <CardDescription>Este formulario ya no está recibiendo respuestas por el momento.</CardDescription>
           </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isSoldOut) {
+    return (
+      <div className="min-h-screen bg-muted/40 p-4 md:p-10 flex items-center justify-center">
+        <Card className="w-full max-w-md shadow-lg border-t-4 border-t-orange-500">
+          <CardHeader>
+            <CardTitle className="text-orange-600">Cupo Agotado</CardTitle>
+            <CardDescription>
+              Lo sentimos, los lugares para este registro se han agotado o están temporalmente reservados. 
+              Intenta de nuevo más tarde por si se liberan espacios.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button className="w-full" onClick={() => window.location.reload()}>Reintentar</Button>
+          </CardFooter>
         </Card>
       </div>
     );
@@ -140,8 +195,7 @@ export function EventRegistrationForm() {
 
   if (success) {
     if (confirmationMode === 'TICKET') {
-      const code = `CONF-${Math.floor(10000 + Math.random() * 90000)}`;
-      window.location.href = `/forms/EventRegistration/ticket?code=${code}`;
+      window.location.href = `/forms/EventRegistration/ticket?folio=${finalFolio || 'CONF-N/A'}`;
       return <div className="min-h-screen bg-muted/40 p-4 flex items-center justify-center">Redirigiendo a tu comprobante...</div>;
     }
 
@@ -164,7 +218,7 @@ export function EventRegistrationForm() {
               <div className="bg-muted p-4 rounded-md text-center">
                 <p className="text-sm text-muted-foreground mb-1">Tu código de confirmación es:</p>
                 <p className="text-2xl font-mono font-bold tracking-widest text-primary">
-                  CONF-{Math.floor(10000 + Math.random() * 90000)}
+                  {finalFolio || 'N/A'}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   (Conserva este código para futuras referencias)
@@ -185,8 +239,7 @@ export function EventRegistrationForm() {
               <Button 
                 className="w-full"
                 onClick={() => {
-                  form.reset();
-                  setSuccess(false);
+                  window.location.reload(); // Reload to get a new reservation token
                 }}
               >
                 Llenar Nuevo Registro
@@ -200,6 +253,17 @@ export function EventRegistrationForm() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
+      {expiresAt && (
+        <div className="w-full max-w-3xl mx-auto mb-4 bg-blue-100 text-blue-800 p-3 rounded-md border border-blue-200 flex justify-between items-center shadow-sm">
+          <div>
+            <strong className="block">¡Tienes un lugar reservado!</strong>
+            <span className="text-sm">Completa el formulario antes de que se agote el tiempo.</span>
+          </div>
+          <div className="text-xl font-mono font-bold">
+            {new Date(expiresAt).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+      )}
       <Card className="w-full max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl">Registro a Eventos</CardTitle>

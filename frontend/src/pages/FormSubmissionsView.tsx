@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatDateTimeMX } from '../lib/locale';
 
 import {
   Table,
@@ -26,7 +26,7 @@ function formatValue(val: any): string {
     return '';
   }
   if (typeof val === 'string' && isoDateRegex.test(val)) {
-    return format(new Date(val), 'dd/MM/yyyy');
+    return formatDateTimeMX(val);
   }
   if (typeof val === 'boolean') {
     return val ? 'Sí' : 'No';
@@ -186,7 +186,7 @@ export function FormSubmissionsView() {
     doc.setFontSize(18);
     doc.text(`Reporte de Registros: ${form_identifier}`, 14, 22);
     doc.setFontSize(11);
-    doc.text(`Fecha de exportación: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 30);
+    doc.text(`Fecha de exportación: ${formatDateTimeMX(new Date())}`, 14, 30);
     
     const tableColumn = columns.map(c => c.label);
     const tableRows = filteredSubmissions.map(sub => {

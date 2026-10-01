@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { format } from 'date-fns';
+import { formatDateMX } from '../lib/locale';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 
 export function AdminDashboard() {
   const [forms, setForms] = useState<any[]>([]);
@@ -36,70 +37,42 @@ export function AdminDashboard() {
     }
   };
 
-  const toggleFormActive = async (formIdentifier: string, currentStatus: boolean) => {
+  const updateConfig = async (formIdentifier: string, updates: any) => {
     try {
-      await axios.patch(`/api/forms/${formIdentifier}/config`, {
-        is_active: !currentStatus
-      });
+      await axios.patch(`/api/forms/${formIdentifier}/config`, updates);
       fetchForms();
     } catch (err) {
-      alert("Error al actualizar el estado del formulario");
+      alert("Error al actualizar la configuración");
     }
   };
 
-  const togglePublicList = async (formIdentifier: string, currentStatus: boolean) => {
-    try {
-      await axios.patch(`/api/forms/${formIdentifier}/config`, {
-        is_listed: !currentStatus
-      });
-      fetchForms();
-    } catch (err) {
-      alert("Error al actualizar la visibilidad");
-    }
+  const toggleFormActive = (formId: string, currentStatus: boolean) => updateConfig(formId, { is_active: !currentStatus });
+  const togglePublicList = (formId: string, currentStatus: boolean) => updateConfig(formId, { is_listed: !currentStatus });
+  const updateConfirmationMode = (formId: string, newMode: string) => updateConfig(formId, { confirmation_mode: newMode });
+  const updateFolioStrategy = (formId: string, strategy: string) => updateConfig(formId, { folio_strategy: strategy });
+  
+  const updateMaxSubmissions = (formId: string, value: string) => {
+    const parsed = value === '' ? null : parseInt(value, 10);
+    if (parsed !== null && isNaN(parsed)) return;
+    updateConfig(formId, { max_submissions: parsed });
   };
 
   const togglePasswordProtection = async (formIdentifier: string, currentPassword: string | null) => {
     if (currentPassword) {
-      // It has a password, turning it OFF
       const confirmRemove = window.confirm("¿Estás seguro de que quieres quitar la contraseña y hacer el acceso libre?");
       if (!confirmRemove) return;
-      try {
-        await axios.patch(`/api/forms/${formIdentifier}/config`, { public_password: null });
-        fetchForms();
-      } catch (err) {
-        alert("Error al quitar la contraseña");
-      }
+      updateConfig(formIdentifier, { public_password: null });
     } else {
-      // It doesn't have a password, turning it ON
       const newPassword = window.prompt("Ingresa la nueva contraseña para proteger el formulario:");
       if (!newPassword || newPassword.trim() === "") return;
-      try {
-        await axios.patch(`/api/forms/${formIdentifier}/config`, { public_password: newPassword.trim() });
-        fetchForms();
-      } catch (err) {
-        alert("Error al establecer la contraseña");
-      }
-    }
-  };
-
-  const updateConfirmationMode = async (formIdentifier: string, newMode: string) => {
-    try {
-      await axios.patch(`/api/forms/${formIdentifier}/config`, { confirmation_mode: newMode });
-      fetchForms();
-    } catch (err) {
-      alert("Error al actualizar el modo de confirmación");
+      updateConfig(formIdentifier, { public_password: newPassword.trim() });
     }
   };
 
   const changePassword = async (formIdentifier: string, currentPassword: string | null) => {
     const newPassword = window.prompt("Ingresa la nueva contraseña para proteger el formulario:", currentPassword || "");
     if (!newPassword || newPassword.trim() === "") return;
-    try {
-      await axios.patch(`/api/forms/${formIdentifier}/config`, { public_password: newPassword.trim() });
-      fetchForms();
-    } catch (err) {
-      alert("Error al actualizar la contraseña");
-    }
+    updateConfig(formIdentifier, { public_password: newPassword.trim() });
   };
 
   if (loading) {
@@ -127,7 +100,7 @@ export function AdminDashboard() {
               <CardHeader>
                 <CardTitle>{form.form_identifier}</CardTitle>
                 <CardDescription>
-                  Creado el {format(new Date(form.created_at), 'dd/MM/yyyy')}
+                  Creado el {formatDateMX(form.created_at)}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -179,6 +152,23 @@ export function AdminDashboard() {
 
                 <div className="flex flex-col space-y-2 mt-4 pt-4 border-t">
                   <div className="space-y-0.5">
+                    <Label className="text-base">Límite de Cupo</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Dejar en blanco para ilimitado.
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Input 
+                      type="number" 
+                      placeholder="Ilimitado" 
+                      defaultValue={form.max_submissions || ''}
+                      onBlur={(e) => updateMaxSubmissions(form.form_identifier, e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col space-y-2 mt-4 pt-4 border-t">
+                  <div className="space-y-0.5">
                     <Label className="text-base">Modo de Confirmación</Label>
                     <p className="text-sm text-muted-foreground">
                       Define qué sucede después de enviar el registro.
@@ -198,6 +188,29 @@ export function AdminDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="flex flex-col space-y-2 mt-4 pt-4 border-t">
+                  <div className="space-y-0.5">
+                    <Label className="text-base">Estrategia de Folio</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Cómo se genera el número de folio/ticket.
+                    </p>
+                  </div>
+                  <Select 
+                    value={form.folio_strategy || 'RANDOM_CHECKSUM'} 
+                    onValueChange={(val) => updateFolioStrategy(form.form_identifier, val)}
+                  >
+                    <SelectTrigger className="w-full mt-2">
+                      <SelectValue placeholder="Selecciona estrategia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CONSECUTIVE">Consecutivo Numérico (1, 2, 3...)</SelectItem>
+                      <SelectItem value="DATE_PREFIX">Prefijo + Fecha (EJ: 2410-001)</SelectItem>
+                      <SelectItem value="RANDOM_CHECKSUM">Alfanumérico Seguro (EJ: X9P2K)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
               </CardContent>
               <CardFooter className="flex justify-between border-t p-4">
                 <Link to={`/forms/${form.form_identifier}`}>

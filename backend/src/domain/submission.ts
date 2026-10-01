@@ -11,4 +11,5 @@ export interface SubmissionRepository {
   softDelete(formIdentifier: string, submissionId: string): Promise<void>;
   findById(formIdentifier: string, submissionId: string): Promise<BaseSubmission | null>;
   findMany(formIdentifier: string, includeDeleted?: boolean): Promise<BaseSubmission[]>;
+  count(formIdentifier: string): Promise<number>;
 }

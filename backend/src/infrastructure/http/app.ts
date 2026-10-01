@@ -7,6 +7,7 @@ import { loginSchema } from '../../shared/validation/auth.schema';
 import { PrismaUserRepository } from '../database/PrismaUserRepository';
 import { PrismaFormConfigRepository } from '../database/PrismaFormConfigRepository';
 import { PrismaSubmissionRepository } from '../database/PrismaSubmissionRepository';
+import { PrismaFormReservationRepository } from '../database/PrismaFormReservationRepository';
 import { PrismaAssetRepository } from '../database/PrismaAssetRepository';
 import { PrismaCustomViewRepository } from '../database/PrismaCustomViewRepository';
 import { LocalFileStorageService } from '../storage/LocalFileStorageService';
@@ -14,6 +15,7 @@ import { ManageFormConfigUseCase } from '../../application/ManageFormConfigUseCa
 import { SubmitFormUseCase } from '../../application/SubmitFormUseCase';
 import { SoftDeleteSubmissionUseCase } from '../../application/SoftDeleteSubmissionUseCase';
 import { GetSubmissionsUseCase } from '../../application/GetSubmissionsUseCase';
+import { ReserveFormSpotUseCase } from '../../application/ReserveFormSpotUseCase';
 import { GetFormConfigUseCase } from '../../application/GetFormConfigUseCase';
 import { GetFormsUseCase } from '../../application/GetFormsUseCase';
 import { GetCustomViewsUseCase } from '../../application/GetCustomViewsUseCase';
@@ -56,10 +58,14 @@ const getFormsUseCase = new GetFormsUseCase(prismaFormConfigRepository);
 const formConfigController = new FormConfigController(manageFormConfigUseCase, getFormConfigUseCase, getFormsUseCase);
 
 const prismaSubmissionRepository = new PrismaSubmissionRepository(prismaClient);
-const submitFormUseCase = new SubmitFormUseCase(prismaFormConfigRepository, prismaSubmissionRepository);
+const prismaFormReservationRepository = new PrismaFormReservationRepository(prismaClient);
+
+const submitFormUseCase = new SubmitFormUseCase(prismaFormConfigRepository, prismaSubmissionRepository, prismaFormReservationRepository);
 const softDeleteUseCase = new SoftDeleteSubmissionUseCase(prismaSubmissionRepository);
 const getSubmissionsUseCase = new GetSubmissionsUseCase(prismaFormConfigRepository, prismaSubmissionRepository);
-const submissionController = new SubmissionController(submitFormUseCase, softDeleteUseCase, getSubmissionsUseCase);
+const reserveFormSpotUseCase = new ReserveFormSpotUseCase(prismaFormConfigRepository, prismaFormReservationRepository, prismaSubmissionRepository);
+
+const submissionController = new SubmissionController(submitFormUseCase, softDeleteUseCase, getSubmissionsUseCase, reserveFormSpotUseCase);
 
 const prismaAssetRepository = new PrismaAssetRepository(prismaClient);
 const localFileStorageService = new LocalFileStorageService();
@@ -96,6 +102,7 @@ apiRouter.get('/public-forms', (req, res) => formConfigController.getPublicList(
 apiRouter.get('/forms', requireAuth([Role.ADMIN, Role.ANALYST]), (req, res) => formConfigController.getAll(req, res));
 apiRouter.get('/forms/:form_identifier/config', (req, res) => formConfigController.getConfig(req, res));
 apiRouter.patch('/forms/:form_identifier/config', requireAuth([Role.ADMIN]), validate(updateFormConfigSchema), (req, res) => formConfigController.updateConfig(req, res));
+apiRouter.post('/forms/:form_identifier/reserve', (req, res) => submissionController.reserve(req, res));
 apiRouter.post('/forms/:form_identifier/submissions', optionalAuth, validate(submitSchema), (req, res) => submissionController.submit(req, res));
 apiRouter.get('/forms/:form_identifier/submissions', requireAuth([Role.ADMIN, Role.ANALYST]), (req, res) => submissionController.getSubmissions(req, res));
 apiRouter.delete('/forms/:form_identifier/submissions/:submission_id', requireAuth([Role.ADMIN]), (req, res) => submissionController.softDelete(req, res));

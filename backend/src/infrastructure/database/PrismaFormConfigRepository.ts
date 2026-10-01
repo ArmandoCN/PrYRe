@@ -17,6 +17,10 @@ export class PrismaFormConfigRepository implements FormConfigRepository {
       is_listed: config.is_listed,
       public_password: config.public_password,
       confirmation_mode: config.confirmation_mode,
+      folio_strategy: config.folio_strategy,
+      folio_prefix: config.folio_prefix,
+      max_submissions: config.max_submissions,
+      reservation_window_minutes: config.reservation_window_minutes,
       created_at: config.created_at,
       updated_at: config.updated_at,
       deleted_at: config.deleted_at
@@ -35,6 +39,10 @@ export class PrismaFormConfigRepository implements FormConfigRepository {
       is_listed: config.is_listed,
       public_password: config.public_password,
       confirmation_mode: config.confirmation_mode,
+      folio_strategy: config.folio_strategy,
+      folio_prefix: config.folio_prefix,
+      max_submissions: config.max_submissions,
+      reservation_window_minutes: config.reservation_window_minutes,
       created_at: config.created_at,
       updated_at: config.updated_at,
       deleted_at: config.deleted_at
@@ -49,6 +57,10 @@ export class PrismaFormConfigRepository implements FormConfigRepository {
         is_listed: formConfig.is_listed,
         public_password: formConfig.public_password,
         confirmation_mode: formConfig.confirmation_mode,
+        folio_strategy: formConfig.folio_strategy,
+        folio_prefix: formConfig.folio_prefix,
+        max_submissions: formConfig.max_submissions,
+        reservation_window_minutes: formConfig.reservation_window_minutes,
         updated_at: formConfig.updated_at,
         deleted_at: formConfig.deleted_at
       },
@@ -59,6 +71,10 @@ export class PrismaFormConfigRepository implements FormConfigRepository {
         is_listed: formConfig.is_listed,
         public_password: formConfig.public_password,
         confirmation_mode: formConfig.confirmation_mode,
+        folio_strategy: formConfig.folio_strategy,
+        folio_prefix: formConfig.folio_prefix,
+        max_submissions: formConfig.max_submissions,
+        reservation_window_minutes: formConfig.reservation_window_minutes,
         created_at: formConfig.created_at,
         updated_at: formConfig.updated_at,
         deleted_at: formConfig.deleted_at

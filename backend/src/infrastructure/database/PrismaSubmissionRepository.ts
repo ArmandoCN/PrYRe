@@ -50,4 +50,13 @@ export class PrismaSubmissionRepository implements SubmissionRepository {
     const where = includeDeleted ? {} : { deleted_at: null };
     return await model.findMany({ where });
   }
+
+  async count(formIdentifier: string): Promise<number> {
+    const modelName = formIdentifier.charAt(0).toLowerCase() + formIdentifier.slice(1);
+    const model = this.prismaClient[modelName];
+    if (!model) {
+      throw new Error(`Model ${modelName} not found in database schema`);
+    }
+    return await model.count({ where: { deleted_at: null } });
+  }
 }

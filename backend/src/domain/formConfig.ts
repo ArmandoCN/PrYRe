@@ -5,6 +5,12 @@ export interface FormConfig {
   is_listed: boolean;
   public_password: string | null;
   confirmation_mode: 'SIMPLE' | 'CODE' | 'TICKET';
+  
+  folio_strategy: 'CONSECUTIVE' | 'PREFIX_DATE_CONSECUTIVE' | 'RANDOM_CHECKSUM';
+  folio_prefix: string | null;
+  max_submissions: number | null;
+  reservation_window_minutes: number;
+
   created_at: Date;
   updated_at: Date;
   deleted_at: Date | null;
