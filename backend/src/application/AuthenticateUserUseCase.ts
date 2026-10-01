@@ -36,9 +36,11 @@ export class AuthenticateUserUseCase {
       */
     }
 
+    const has_default_password = password === 'admin123';
+    
     const secret = process.env.JWT_SECRET || 'default-secret';
     const token = jwt.sign(
-      { userId: user.id, role: user.role, email: user.email },
+      { userId: user.id, role: user.role, email: user.email, has_default_password },
       secret,
       { expiresIn: '1h' }
     );
@@ -49,6 +51,7 @@ export class AuthenticateUserUseCase {
         id: user.id,
         email: user.email,
         role: user.role,
+        has_default_password
       },
     };
   }

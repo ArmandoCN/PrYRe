@@ -5,6 +5,7 @@ import { TicketView } from './pages/TicketView';
 import { Login } from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { FormSubmissionsView } from './pages/FormSubmissionsView';
+import { ForcePasswordChange } from './components/ForcePasswordChange';
 
 function App() {
   return (
@@ -15,8 +16,16 @@ function App() {
         <Route path="/forms/EventRegistration/ticket" element={<TicketView />} />
         
         <Route path="/admin/login" element={<Login />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/forms/:form_identifier/data" element={<FormSubmissionsView />} />
+        <Route path="/admin/dashboard" element={
+          <ForcePasswordChange>
+            <AdminDashboard />
+          </ForcePasswordChange>
+        } />
+        <Route path="/admin/forms/:form_identifier/data" element={
+          <ForcePasswordChange>
+            <FormSubmissionsView />
+          </ForcePasswordChange>
+        } />
       </Routes>
     </BrowserRouter>
   );

@@ -40,11 +40,14 @@ app.use(cookieParser());
 
 const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit configured in multer as well
 
+import { ChangePasswordUseCase } from '../../application/ChangePasswordUseCase';
+
 const prismaClient = new PrismaClient();
 
 const prismaUserRepository = new PrismaUserRepository(prismaClient); 
 const authenticateUserUseCase = new AuthenticateUserUseCase(prismaUserRepository);
-const authController = new AuthController(authenticateUserUseCase);
+const changePasswordUseCase = new ChangePasswordUseCase(prismaUserRepository);
+const authController = new AuthController(authenticateUserUseCase, changePasswordUseCase);
 
 const prismaFormConfigRepository = new PrismaFormConfigRepository(prismaClient);
 const manageFormConfigUseCase = new ManageFormConfigUseCase(prismaFormConfigRepository);
@@ -73,7 +76,12 @@ const optionalAuth = (req: any, res: any, next: any) => {
   if (token) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret') as any;
-      req.user = { id: decoded.userId, role: decoded.role, email: decoded.email };
+      req.user = { 
+        id: decoded.userId, 
+        role: decoded.role, 
+        email: decoded.email,
+        has_default_password: decoded.has_default_password
+      };
     } catch (e) {}
   }
   next();
@@ -82,6 +90,8 @@ const optionalAuth = (req: any, res: any, next: any) => {
 const apiRouter = express.Router();
 
 apiRouter.post('/auth/login', validate(loginSchema), (req, res) => authController.login(req, res));
+apiRouter.get('/auth/me', requireAuth(), (req, res) => authController.getMe(req, res));
+apiRouter.post('/auth/change-password', requireAuth(), (req, res) => authController.changePassword(req, res));
 apiRouter.get('/public-forms', (req, res) => formConfigController.getPublicList(req, res));
 apiRouter.get('/forms', requireAuth([Role.ADMIN, Role.ANALYST]), (req, res) => formConfigController.getAll(req, res));
 apiRouter.get('/forms/:form_identifier/config', (req, res) => formConfigController.getConfig(req, res));

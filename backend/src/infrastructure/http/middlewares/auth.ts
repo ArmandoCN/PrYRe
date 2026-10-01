@@ -18,6 +18,7 @@ export const requireAuth = (allowedRoles?: Role[]) => {
         id: decoded.userId,
         email: decoded.email,
         role: decoded.role,
+        has_default_password: decoded.has_default_password
       };
 
       if (allowedRoles && !allowedRoles.includes((req as any).user.role)) {
