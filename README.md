@@ -1,6 +1,6 @@
 # Registros - Forms & Surveys Platform
 
-> Functional prototype of a platform for surveys, registrations, and forms. Its primary purpose is to provide a solid framework for developing custom questionnaires efficiently. By reusing a centralized management and dashboard infrastructure, developers only need to program the specific questionnaire UI and data schema based on concrete specifications, drastically reducing development time.
+> Functional framework for surveys, registrations, and forms. It accelerates development by providing a centralized management dashboard and data infrastructure out of the box. Developers only need to build the specific questionnaire UI and schema based on concrete specifications, drastically reducing time-to-market for new forms.
 
 ## 🚀 Key Features
 
