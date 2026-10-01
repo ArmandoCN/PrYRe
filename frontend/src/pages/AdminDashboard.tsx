@@ -54,6 +54,10 @@ export function AdminDashboard() {
   const updateMaxSubmissions = (formId: string, value: string) => {
     const parsed = value === '' ? null : parseInt(value, 10);
     if (parsed !== null && isNaN(parsed)) return;
+    if (parsed !== null && parsed < 1) {
+      alert("El límite de cupo debe ser al menos 1, o déjalo en blanco para ilimitado.");
+      return;
+    }
     updateConfig(formId, { max_submissions: parsed });
   };
 

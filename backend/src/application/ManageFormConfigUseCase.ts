@@ -35,6 +35,14 @@ export class ManageFormConfigUseCase {
       config.confirmation_mode = updates.confirmation_mode;
     }
 
+    if ('max_submissions' in updates) {
+      config.max_submissions = (updates as any).max_submissions;
+    }
+
+    if ('folio_strategy' in updates) {
+      config.folio_strategy = (updates as any).folio_strategy;
+    }
+
     config.updated_at = new Date();
 
     await this.formConfigRepository.save(config);

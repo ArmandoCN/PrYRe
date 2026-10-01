@@ -41,7 +41,8 @@ export class ReserveFormSpotUseCase {
     return {
       reservation_token: reservation.id,
       expires_at: reservation.expires_at,
-      reservation_window_minutes: config.reservation_window_minutes
+      reservation_window_minutes: config.reservation_window_minutes,
+      has_limit: config.max_submissions !== null && config.max_submissions !== undefined
     };
   }
 }

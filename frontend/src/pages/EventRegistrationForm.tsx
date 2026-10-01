@@ -36,6 +36,7 @@ export function EventRegistrationForm() {
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [isSoldOut, setIsSoldOut] = useState(false);
   const [finalFolio, setFinalFolio] = useState<string | null>(null);
+  const [hasLimit, setHasLimit] = useState(false);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -66,6 +67,7 @@ export function EventRegistrationForm() {
         if (response.data.success) {
           setReservationToken(response.data.data.reservation_token);
           setExpiresAt(new Date(response.data.data.expires_at));
+          setHasLimit(response.data.data.has_limit);
         }
       } catch (err: any) {
         if (err.response?.data?.error?.code === 'LIMIT_REACHED') {
@@ -253,7 +255,7 @@ export function EventRegistrationForm() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
-      {expiresAt && (
+      {hasLimit && expiresAt && (
         <div className="w-full max-w-3xl mx-auto mb-4 bg-blue-100 text-blue-800 p-3 rounded-md border border-blue-200 flex justify-between items-center shadow-sm">
           <div>
             <strong className="block">¡Tienes un lugar reservado!</strong>
