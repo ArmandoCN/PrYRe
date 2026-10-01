@@ -47,3 +47,9 @@
 
 ---
 **STATUS:** Phase 3 and 4 (Core Administrative and Registration Development) DECLARED COMPLETE AND FULLY FUNCTIONAL END-TO-END.
+
+## 4. Licensing Strategy
+The platform is strictly licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**.
+- **Intent:** To adopt a Dual-Licensing business model.
+- **Open Source:** The community is encouraged to use, study, modify, and host the platform. However, any network-based deployment of modified versions legally requires the deployer to open-source their modifications.
+- **Commercialization:** Entities wishing to monetize or utilize the platform in a closed-source, proprietary capacity must seek explicit authorization and negotiate a separate commercial license, as the AGPLv3 prevents closed-source network hosting of modified software.

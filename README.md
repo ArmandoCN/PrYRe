@@ -41,3 +41,10 @@ For detailed instructions on how to create a new form or understand the architec
 - [Developer Guide (How to add forms)](docs/DEVELOPER_GUIDE.md)
 - [Technical Architecture Annex](docs/TECHNICAL_ANNEX.md)
 - [Docker Architecture Annex](docs/CONTAINERIZATION_ANNEX.md)
+
+## 📄 License
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**. 
+- You are free to use, study, modify, and share this software.
+- If you modify and distribute or host this software over a network, you must release the source code of your modifications under the same license.
+- For commercial usage without open-sourcing your modifications, you must request authorization (Commercial License).
