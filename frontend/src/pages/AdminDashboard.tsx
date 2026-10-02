@@ -52,13 +52,13 @@ export function AdminDashboard() {
   const updateFolioStrategy = (formId: string, strategy: string) => updateConfig(formId, { folio_strategy: strategy });
   
   const updateMaxSubmissions = (formId: string, value: string) => {
-    const parsed = value === '' ? null : parseInt(value, 10);
-    if (parsed !== null && isNaN(parsed)) return;
-    if (parsed !== null && parsed < 1) {
-      alert("El límite de cupo debe ser al menos 1, o déjalo en blanco para ilimitado.");
+    let parsed = parseInt(value, 10);
+    if (isNaN(parsed)) parsed = 0;
+    if (parsed < 0) {
+      alert("El límite de cupo no puede ser negativo. Usa 0 para sin límite.");
       return;
     }
-    updateConfig(formId, { max_submissions: parsed });
+    updateConfig(formId, { max_submissions: parsed === 0 ? null : parsed });
   };
 
   const togglePasswordProtection = async (formIdentifier: string, currentPassword: string | null) => {
@@ -164,8 +164,9 @@ export function AdminDashboard() {
                   <div className="flex space-x-2">
                     <Input 
                       type="number" 
-                      placeholder="Ilimitado" 
-                      defaultValue={form.max_submissions || ''}
+                      min="0"
+                      placeholder="0" 
+                      defaultValue={form.max_submissions === null ? 0 : form.max_submissions}
                       onBlur={(e) => updateMaxSubmissions(form.form_identifier, e.target.value)}
                     />
                   </div>
