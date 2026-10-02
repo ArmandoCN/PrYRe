@@ -5,18 +5,25 @@
 ## 1. REST API ENDPOINTS
 
 **Authentication & Meta:**
-- `POST /api/auth/login`: Authenticates an ADMIN/ANALYST. Returns an HTTP-Only JWT cookie.
+- `POST /api/auth/login`: Authenticates an ADMIN/ANALYST/SUPERADMIN. Returns an HTTP-Only JWT cookie.
 - `GET /api/public-forms`: Returns a lightweight list of active and listed forms (`id`, `form_identifier`). No auth required.
+
+**Users & Roles (RBAC):**
+- `GET /api/users`: Returns all users. Requires SUPERADMIN.
+- `POST /api/users`: Creates a new user with temporary password. Requires SUPERADMIN.
+- `PATCH /api/users/:id/password`: Changes a user's password. Requires SUPERADMIN.
+- `POST /api/users/:id/access`: Sets the list of form identifiers a user can access. Requires SUPERADMIN.
 
 **Form Configuration:**
 - `GET /api/forms/:form_identifier/config`: Retrieves public config (`is_active`, `requires_password`, `confirmation_mode`).
-- `GET /api/forms`: Lists all configs. Requires Auth.
-- `PATCH /api/forms/:form_identifier/config`: Updates config settings. Requires ADMIN.
+- `GET /api/forms`: Lists all configs. Requires Auth. (Filters dynamically based on UserFormAccess for non-SUPERADMINs).
+- `PATCH /api/forms/:form_identifier/config`: Updates config settings. Requires SUPERADMIN or ADMIN.
 
 **Data Submissions:**
-- `POST /api/forms/:form_identifier/submissions`: Accepts payload. Validation requires `data.payload` and `data.public_password` (if protected).
-- `GET /api/forms/:form_identifier/submissions`: Retrieves all submissions (excluding soft-deleted). Requires Auth.
-- `DELETE /api/forms/:form_identifier/submissions/:submission_id`: Performs a soft delete (`deleted_at = NOW()`). Requires ADMIN.
+- `POST /api/forms/:form_identifier/reserve`: Claims a temporary reservation spot using a client-side UUID token.
+- `POST /api/forms/:form_identifier/submissions`: Accepts payload. Validation requires `data.payload`, `data.public_password` (if protected), and `reservation_token` (if limited capacity).
+- `GET /api/forms/:form_identifier/submissions`: Retrieves all submissions (excluding soft-deleted). Requires Auth (SUPERADMIN, ADMIN, or ANALYST with explicit access).
+- `DELETE /api/forms/:form_identifier/submissions/:submission_id`: Performs a soft delete (`deleted_at = NOW()`). Requires SUPERADMIN or ADMIN.
 
 ## 2. FRONTEND STACK & STYLING
 - **Framework:** React + Vite (TypeScript) + React Router v6.
