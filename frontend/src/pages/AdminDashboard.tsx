@@ -48,7 +48,13 @@ export function AdminDashboard() {
 
   const toggleFormActive = (formId: string, currentStatus: boolean) => updateConfig(formId, { is_active: !currentStatus });
   const togglePublicList = (formId: string, currentStatus: boolean) => updateConfig(formId, { is_listed: !currentStatus });
-  const updateConfirmationMode = (formId: string, newMode: string) => updateConfig(formId, { confirmation_mode: newMode });
+  const updateConfirmationMode = (formId: string, newMode: string) => {
+    if (newMode === 'SIMPLE') {
+      updateConfig(formId, { confirmation_mode: newMode, folio_strategy: 'NONE' });
+    } else {
+      updateConfig(formId, { confirmation_mode: newMode });
+    }
+  };
   const updateFolioStrategy = (formId: string, strategy: string) => updateConfig(formId, { folio_strategy: strategy });
   
   const updateMaxSubmissions = (formId: string, value: string) => {
@@ -204,11 +210,13 @@ export function AdminDashboard() {
                   <Select 
                     value={form.folio_strategy || 'RANDOM_CHECKSUM'} 
                     onValueChange={(val) => updateFolioStrategy(form.form_identifier, val)}
+                    disabled={form.confirmation_mode === 'SIMPLE'}
                   >
                     <SelectTrigger className="w-full mt-2">
                       <SelectValue placeholder="Selecciona estrategia" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="NONE">Ninguna</SelectItem>
                       <SelectItem value="CONSECUTIVE">Consecutivo Numérico (1, 2, 3...)</SelectItem>
                       <SelectItem value="PREFIX_DATE_CONSECUTIVE">Prefijo + Fecha (EJ: 2410-001)</SelectItem>
                       <SelectItem value="RANDOM_CHECKSUM">Alfanumérico Seguro (EJ: X9P2K)</SelectItem>

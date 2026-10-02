@@ -2,10 +2,12 @@ import crypto from 'crypto';
 
 export class FolioGeneratorService {
   static async generate(
-    strategy: 'CONSECUTIVE' | 'PREFIX_DATE_CONSECUTIVE' | 'RANDOM_CHECKSUM',
+    strategy: 'NONE' | 'CONSECUTIVE' | 'PREFIX_DATE_CONSECUTIVE' | 'RANDOM_CHECKSUM',
     prefix: string | null,
     submissionCount: number
-  ): Promise<string> {
+  ): Promise<string | null> {
+    if (strategy === 'NONE') return null;
+
     const safePrefix = prefix ? `${prefix}-` : '';
     const nextNumber = submissionCount + 1;
     

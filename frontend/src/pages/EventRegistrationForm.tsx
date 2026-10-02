@@ -309,7 +309,7 @@ export function EventRegistrationForm() {
                       <FormItem className="flex flex-col mt-2">
                         <FormLabel>Fecha</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" lang="es-MX" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -343,7 +343,7 @@ export function EventRegistrationForm() {
                       <FormItem className="flex flex-col mt-2">
                         <FormLabel>Fecha de Nacimiento</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input type="date" lang="es-MX" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -580,6 +580,77 @@ export function EventRegistrationForm() {
                 </div>
               </div>
 
+              {/* SECCIÓN: Información de Segundo Contacto */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium border-b pb-2">Segundo Contacto (Opcional)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="contact2_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre del Contacto</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="contact2_relation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Relación</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="PADRE">Padre</SelectItem>
+                            <SelectItem value="MADRE">Madre</SelectItem>
+                            <SelectItem value="TUTOR">Tutor</SelectItem>
+                            <SelectItem value="OTRO_FAMILIAR">Otro Familiar</SelectItem>
+                            <SelectItem value="OTRO">Otro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="contact2_email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correo</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="contact2_phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Teléfono</FormLabel>
+                        <FormControl>
+                          <Input type="tel" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
               {/* SECCIÓN: Autorización e Indicaciones */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium border-b pb-2">Autorización e Indicaciones</h3>
