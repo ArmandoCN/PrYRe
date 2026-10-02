@@ -15,7 +15,7 @@
 - `POST /api/users/:id/access`: Sets the list of form identifiers a user can access. Requires SUPERADMIN.
 
 **Form Configuration:**
-- `GET /api/forms/:form_identifier/config`: Retrieves public config (`is_active`, `requires_password`, `confirmation_mode`).
+- `GET /api/forms/:form_identifier/config`: Retrieves public config (`is_active`, `requires_password`, `confirmation_mode`, `max_submissions`).
 - `GET /api/forms`: Lists all configs. Requires Auth. (Filters dynamically based on UserFormAccess for non-SUPERADMINs).
 - `PATCH /api/forms/:form_identifier/config`: Updates config settings. Requires SUPERADMIN or ADMIN.
 
@@ -35,7 +35,7 @@
 
 ## 3. BLUEPRINT: HOW TO BUILD A NEW FORM (LLM INSTRUCTION)
 
-If you (the LLM) are tasked with creating a new form (e.g., `JobApplication`), strictly follow these 4 steps:
+If you (the LLM) are tasked with creating a new form (e.g., `JobApplication`), strictly follow these steps:
 
 ### STEP 1: Backend Database Schema (`prisma/schema.prisma`)
 Add a new model for the form.
@@ -43,28 +43,6 @@ Add a new model for the form.
 2. Name the model in PascalCase (e.g., `model JobApplication`).
 3. Add the business fields.
 4. Run `npx prisma generate && npx prisma db push`.
-
-### STEP 2: Zod Validation Schema (Frontend)
-Create a validation file `src/lib/validations/jobApplication.ts`.
-- Form inputs mapped to Prisma `DateTime` MUST be declared as `z.string().min(1)` in the frontend. (HTML `<input type="date">` produces strings).
-- Enum fields in Prisma MUST be mapped using `z.enum([...])`.
-
-### STEP 3: Frontend Component Layout (`src/pages/JobApplicationForm.tsx`)
-1. **Config Hook:** Always fetch `/api/forms/JobApplication/config` on mount to set `isActive`, `requiresPassword`, and `confirmationMode` states. If `isActive` is false, render a "Closed" message.
-2. **Form Render:** Use Shadcn UI `<Form>` wrappers. Render `<FormField>` for every input.
-3. **Password Wall:** If `requiresPassword` is true, render a password lock screen *before* revealing the main form.
-4. **Data Transformation (CRITICAL):** In your `onSubmit(data)` handler, before sending to Axios:
-   - You MUST transform all date strings to ISO-8601 strictly. Example: `birthdate: new Date(data.birthdate).toISOString()`. Prisma will crash otherwise.
-   - You MUST wrap the payload in this structure: `{ payload: { ...transformedData }, public_password: passwordInput }`.
-5. **Success Handling:** Map behavior to `confirmationMode`:
-   - `TICKET`: Redirect to `/forms/JobApplication/ticket?code=XYZ` (The ticket view is universal or you can build a custom one).
-   - `CODE`: Render a success UI with a generated confirmation code.
-   - `SIMPLE`: Render a standard success UI.
-
-### STEP 4: Routing (`src/App.tsx`)
-Add the route mapping the identifier to the component: `<Route path="/forms/JobApplication" element={<JobApplicationForm />} />`.
-
-**NOTE ON DATA VIEWER:** You DO NOT need to build a data viewer or admin panel for your new form. The `FormSubmissionsView.tsx` component is dynamically universal. As long as you followed the naming conventions, navigating to `/admin/forms/JobApplication/data` will automatically render a fully functional table, export engine (PDF/XLSX), and bulk-delete system for your new form.
 
 ### STEP 1.5: Register the Form in the Database
 You MUST insert a base record into the `FormConfig` table for the new form so the Admin Panel can control it.
@@ -76,3 +54,28 @@ await prisma.formConfig.upsert({
   create: { form_identifier: 'JobApplication', is_active: true, is_listed: true },
 });
 ```
+
+### STEP 2: Zod Validation Schema (Frontend)
+Create a validation file `src/lib/validations/jobApplication.ts`.
+- Form inputs mapped to Prisma `DateTime` MUST be declared as `z.string().min(1)` in the frontend. (HTML `<input type="date">` produces strings).
+- Enum fields in Prisma MUST be mapped using `z.enum([...])`.
+
+### STEP 3: Frontend Component Layout (`src/pages/JobApplicationForm.tsx`)
+1. **Config Hook:** Always fetch `/api/forms/JobApplication/config` on mount to set `isActive`, `requiresPassword`, `confirmationMode`, and `maxSubmissions` states. If `isActive` is false, render a "Closed" message.
+2. **Capacity & Reservations (CRITICAL):** If `maxSubmissions > 0`, you MUST call `POST /api/forms/JobApplication/reserve` when the component mounts to reserve a spot. 
+   - Generate a UUID `reservationToken` and store it in `localStorage` alongside its expiration time to recover it on accidental tab close.
+   - If `/reserve` returns `409 Conflict`, render a "Form is Full" message.
+3. **Form Render:** Use Shadcn UI `<Form>` wrappers. Render `<FormField>` for every input.
+4. **Password Wall:** If `requiresPassword` is true, render a password lock screen *before* revealing the main form.
+5. **Data Transformation (CRITICAL):** In your `onSubmit(data)` handler, before sending to Axios:
+   - You MUST transform all date strings to ISO-8601 strictly. Example: `birthdate: new Date(data.birthdate).toISOString()`. Prisma will crash otherwise.
+   - You MUST wrap the payload in this structure: `{ payload: { ...transformedData }, public_password: passwordInput, reservation_token: reservationToken }`.
+6. **Success Handling:** Clear the `localStorage` reservation token. Map behavior to `confirmationMode`:
+   - `TICKET`: Redirect to `/forms/JobApplication/ticket?code=XYZ`.
+   - `CODE`: Render a success UI with a generated confirmation code.
+   - `SIMPLE`: Render a standard success UI.
+
+### STEP 4: Routing (`src/App.tsx`)
+Add the route mapping the identifier to the component: `<Route path="/forms/JobApplication" element={<JobApplicationForm />} />`.
+
+**NOTE ON DATA VIEWER:** You DO NOT need to build a data viewer or admin panel for your new form. The `FormSubmissionsView.tsx` component is dynamically universal. As long as you followed the naming conventions, navigating to `/admin/forms/JobApplication/data` will automatically render a fully functional table, export engine (PDF/XLSX), and bulk-delete system for your new form.
