@@ -8,12 +8,19 @@ async function main() {
   
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
-    update: {},
+    update: { role: 'SUPERADMIN' },
     create: {
       email: 'admin@example.com',
       password_hash: passwordHash,
-      role: 'ADMIN',
+      role: 'SUPERADMIN',
     },
+  });
+
+  // Migración automática: Convertir todos los ADMIN actuales a SUPERADMIN
+  // para que los usuarios no pierdan el acceso maestro al aplicar este parche.
+  await prisma.user.updateMany({
+    where: { role: 'ADMIN' },
+    data: { role: 'SUPERADMIN' }
   });
 
   await prisma.formConfig.upsert({

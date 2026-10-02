@@ -1,5 +1,4 @@
 import app from './infrastructure/http/app.js';
-import { db } from './prisma/db.js';
 
 const PORT = process.env.PORT || 3000;
 

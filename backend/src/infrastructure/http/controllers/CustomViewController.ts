@@ -12,7 +12,7 @@ export class CustomViewController {
   async getCustomViews(req: Request, res: Response) {
     try {
       const { form_identifier } = req.params;
-      const views = await this.getCustomViewsUseCase.execute(form_identifier);
+      const views = await this.getCustomViewsUseCase.execute(form_identifier as string);
       
       return res.status(200).json({
         success: true,

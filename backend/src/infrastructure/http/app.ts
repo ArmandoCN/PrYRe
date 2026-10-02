@@ -44,7 +44,7 @@ const upload = multer({ limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit c
 
 import { ChangePasswordUseCase } from '../../application/ChangePasswordUseCase';
 
-const prismaClient = new PrismaClient();
+import { prisma as prismaClient } from '../database/prisma';
 
 const prismaUserRepository = new PrismaUserRepository(prismaClient); 
 const authenticateUserUseCase = new AuthenticateUserUseCase(prismaUserRepository);
@@ -56,6 +56,11 @@ const manageFormConfigUseCase = new ManageFormConfigUseCase(prismaFormConfigRepo
 const getFormConfigUseCase = new GetFormConfigUseCase(prismaFormConfigRepository);
 const getFormsUseCase = new GetFormsUseCase(prismaFormConfigRepository);
 const formConfigController = new FormConfigController(manageFormConfigUseCase, getFormConfigUseCase, getFormsUseCase);
+
+import { ManageUsersUseCase } from '../../application/users/ManageUsersUseCase';
+import { UserController } from './controllers/UserController';
+const manageUsersUseCase = new ManageUsersUseCase();
+const userController = new UserController(manageUsersUseCase);
 
 const prismaSubmissionRepository = new PrismaSubmissionRepository(prismaClient);
 const prismaFormReservationRepository = new PrismaFormReservationRepository(prismaClient);
@@ -99,18 +104,25 @@ apiRouter.post('/auth/login', validate(loginSchema), (req, res) => authControlle
 apiRouter.get('/auth/me', requireAuth(), (req, res) => authController.getMe(req, res));
 apiRouter.post('/auth/change-password', requireAuth(), (req, res) => authController.changePassword(req, res));
 apiRouter.get('/public-forms', (req, res) => formConfigController.getPublicList(req, res));
-apiRouter.get('/forms', requireAuth([Role.ADMIN, Role.ANALYST]), (req, res) => formConfigController.getAll(req, res));
+apiRouter.get('/forms', requireAuth(['SUPERADMIN', 'ADMIN', 'ANALYST']), (req, res) => formConfigController.getAll(req, res));
 apiRouter.get('/forms/:form_identifier/config', (req, res) => formConfigController.getConfig(req, res));
-apiRouter.patch('/forms/:form_identifier/config', requireAuth([Role.ADMIN]), validate(updateFormConfigSchema), (req, res) => formConfigController.updateConfig(req, res));
+apiRouter.patch('/forms/:form_identifier/config', requireAuth(['SUPERADMIN', 'ADMIN'], true), validate(updateFormConfigSchema), (req, res) => formConfigController.updateConfig(req, res));
 apiRouter.post('/forms/:form_identifier/reserve', (req, res) => submissionController.reserve(req, res));
 apiRouter.post('/forms/:form_identifier/submissions', optionalAuth, validate(submitSchema), (req, res) => submissionController.submit(req, res));
-apiRouter.get('/forms/:form_identifier/submissions', requireAuth([Role.ADMIN, Role.ANALYST]), (req, res) => submissionController.getSubmissions(req, res));
-apiRouter.delete('/forms/:form_identifier/submissions/:submission_id', requireAuth([Role.ADMIN]), (req, res) => submissionController.softDelete(req, res));
+apiRouter.get('/forms/:form_identifier/submissions', requireAuth(['SUPERADMIN', 'ADMIN', 'ANALYST'], true), (req, res) => submissionController.getSubmissions(req, res));
+apiRouter.delete('/forms/:form_identifier/submissions/:submission_id', requireAuth(['SUPERADMIN', 'ADMIN'], true), (req, res) => submissionController.softDelete(req, res));
 
 apiRouter.post('/assets', optionalAuth, upload.single('file'), (req, res) => assetController.upload(req, res));
 
-apiRouter.post('/custom-views', requireAuth([Role.ADMIN]), validate(createCustomViewSchema), (req, res) => customViewController.create(req, res));
-apiRouter.get('/forms/:form_identifier/custom-views', requireAuth([Role.ADMIN, Role.ANALYST]), (req, res) => customViewController.getCustomViews(req, res));
+apiRouter.post('/custom-views', requireAuth(['SUPERADMIN', 'ADMIN']), validate(createCustomViewSchema), (req, res) => customViewController.create(req, res));
+apiRouter.get('/forms/:form_identifier/custom-views', requireAuth(['SUPERADMIN', 'ADMIN', 'ANALYST'], true), (req, res) => customViewController.getCustomViews(req, res));
+
+apiRouter.get('/users', requireAuth(['SUPERADMIN']), (req, res) => userController.getAll(req, res));
+apiRouter.post('/users', requireAuth(['SUPERADMIN']), (req, res) => userController.create(req, res));
+apiRouter.delete('/users/:id', requireAuth(['SUPERADMIN']), (req, res) => userController.delete(req, res));
+apiRouter.patch('/users/:id/password', requireAuth(['SUPERADMIN']), (req, res) => userController.changePassword(req, res));
+apiRouter.patch('/users/:id/role', requireAuth(['SUPERADMIN']), (req, res) => userController.updateRole(req, res));
+apiRouter.post('/users/:id/access', requireAuth(['SUPERADMIN']), (req, res) => userController.setFormAccess(req, res));
 
 app.use('/api', apiRouter);
 

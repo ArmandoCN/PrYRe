@@ -14,6 +14,7 @@ export function AdminDashboard() {
   const [forms, setForms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,10 +23,12 @@ export function AdminDashboard() {
 
   const fetchForms = async () => {
     try {
-      const response = await axios.get('/api/forms');
-      if (response.data.success) {
-        setForms(response.data.data);
-      }
+      const [meRes, formsRes] = await Promise.all([
+        axios.get('/api/auth/me'),
+        axios.get('/api/forms')
+      ]);
+      setUserRole(meRes.data.data.role);
+      setForms(formsRes.data.data);
     } catch (err: any) {
       if (err.response?.status === 401 || err.response?.status === 403) {
         navigate('/admin/login');
@@ -98,7 +101,12 @@ export function AdminDashboard() {
             Gestión global de formularios y recolección de datos
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/')}>Volver al inicio</Button>
+        <div className="space-x-4">
+          {userRole === 'SUPERADMIN' && (
+            <Button onClick={() => navigate('/admin/users')}>Gestión de Usuarios</Button>
+          )}
+          <Button variant="outline" onClick={() => navigate('/')}>Salir</Button>
+        </div>
       </div>
 
       {error ? (

@@ -13,7 +13,8 @@ export class FormConfigController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const forms = await this.getFormsUseCase.execute();
+      const user = (req as any).user;
+      const forms = await this.getFormsUseCase.execute(user);
       return res.status(200).json({
         success: true,
         data: forms
@@ -45,7 +46,7 @@ export class FormConfigController {
   async getConfig(req: Request, res: Response) {
     try {
       const { form_identifier } = req.params;
-      const config = await this.getFormConfigUseCase.execute(form_identifier);
+      const config = await this.getFormConfigUseCase.execute(form_identifier as string);
       
       const safeConfig = {
         id: config.id,
@@ -75,7 +76,7 @@ export class FormConfigController {
       const { form_identifier } = req.params;
       const updates = req.body;
 
-      const updatedConfig = await this.manageFormConfigUseCase.execute(user, form_identifier, updates);
+      const updatedConfig = await this.manageFormConfigUseCase.execute(user, form_identifier as string, updates);
 
       return res.status(200).json({
         success: true,

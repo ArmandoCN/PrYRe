@@ -4,6 +4,7 @@ import { EventRegistrationForm } from './pages/EventRegistrationForm';
 import { TicketView } from './pages/TicketView';
 import { Login } from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminUsersDashboard } from './pages/AdminUsersDashboard';
 import { FormSubmissionsView } from './pages/FormSubmissionsView';
 import { ForcePasswordChange } from './components/ForcePasswordChange';
 
@@ -19,6 +20,11 @@ function App() {
         <Route path="/admin/dashboard" element={
           <ForcePasswordChange>
             <AdminDashboard />
+          </ForcePasswordChange>
+        } />
+        <Route path="/admin/users" element={
+          <ForcePasswordChange>
+            <AdminUsersDashboard />
           </ForcePasswordChange>
         } />
         <Route path="/admin/forms/:form_identifier/data" element={

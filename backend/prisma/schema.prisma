@@ -8,6 +8,7 @@ generator client {
 }
 
 enum Role {
+  SUPERADMIN
   ADMIN
   ANALYST
 }
@@ -22,6 +23,7 @@ model User {
   updated_at    DateTime  @updatedAt
   deleted_at    DateTime?
   assets        Asset[]
+  form_accesses UserFormAccess[]
 }
 
 enum ConfirmationMode {
@@ -74,6 +76,16 @@ model FormReservation {
   updated_at      DateTime         @updatedAt
 
   @@index([form_identifier, status])
+}
+
+model UserFormAccess {
+  user_id         String   @db.Uuid
+  form_identifier String
+  created_at      DateTime @default(now())
+
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, form_identifier])
 }
 
 model Asset {
