@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function AdminUsersDashboard() {
   const [users, setUsers] = useState<any[]>([]);
@@ -11,6 +14,13 @@ export function AdminUsersDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newRole, setNewRole] = useState('ANALYST');
+  const [newPassword, setNewPassword] = useState('');
+  const [createError, setCreateError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -26,7 +36,7 @@ export function AdminUsersDashboard() {
       setForms(formsRes.data.data);
     } catch (err: any) {
       if (err.response?.status === 401 || err.response?.status === 403) {
-        navigate('/admin/dashboard'); // Fallback if not SUPERADMIN
+        navigate('/admin/dashboard');
       } else {
         setError('Error al cargar datos. Solo los SUPERADMIN tienen acceso.');
       }
@@ -35,19 +45,21 @@ export function AdminUsersDashboard() {
     }
   };
 
-  const handleCreateUser = async () => {
-    const email = window.prompt("Email del nuevo usuario:");
-    if (!email) return;
-    const role = window.prompt("Rol (ADMIN o ANALYST):", "ANALYST");
-    if (!role || (role !== 'ADMIN' && role !== 'ANALYST' && role !== 'SUPERADMIN')) return;
-    const password = window.prompt("Contraseña temporal:");
-    if (!password) return;
-
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateError('');
+    setIsSubmitting(true);
     try {
-      await axios.post('/api/users', { email, role, password });
+      await axios.post('/api/users', { email: newEmail, role: newRole, password: newPassword });
+      setShowCreateModal(false);
+      setNewEmail('');
+      setNewRole('ANALYST');
+      setNewPassword('');
       fetchData();
     } catch (e: any) {
-      alert("Error al crear usuario: " + e.message);
+      setCreateError(e.response?.data?.error?.message || "Error al crear usuario");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -88,7 +100,7 @@ export function AdminUsersDashboard() {
   if (loading) return <div className="flex h-screen items-center justify-center">Cargando usuarios...</div>;
 
   return (
-    <div className="container mx-auto py-10 space-y-6">
+    <div className="container mx-auto py-10 space-y-6 relative">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
@@ -96,7 +108,7 @@ export function AdminUsersDashboard() {
         </div>
         <div className="space-x-4">
           <Button variant="outline" onClick={() => navigate('/admin/dashboard')}>Volver a Formularios</Button>
-          <Button onClick={handleCreateUser}>Nuevo Usuario</Button>
+          <Button onClick={() => setShowCreateModal(true)}>Nuevo Usuario</Button>
         </div>
       </div>
 
@@ -155,6 +167,63 @@ export function AdminUsersDashboard() {
             </Table>
           </CardContent>
         </Card>
+      )}
+
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md bg-background">
+            <form onSubmit={handleCreateUser}>
+              <CardHeader>
+                <CardTitle>Crear Nuevo Usuario</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {createError && <div className="text-destructive text-sm font-medium">{createError}</div>}
+                
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input 
+                    type="email" 
+                    value={newEmail} 
+                    onChange={e => setNewEmail(e.target.value)} 
+                    required 
+                    placeholder="usuario@ejemplo.com"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Contraseña (Temporal)</Label>
+                  <Input 
+                    type="password" 
+                    value={newPassword} 
+                    onChange={e => setNewPassword(e.target.value)} 
+                    required 
+                    placeholder="Escribe una contraseña segura"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Rol</Label>
+                  <Select value={newRole} onValueChange={setNewRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona el rol" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ANALYST">Analista (ANALYST)</SelectItem>
+                      <SelectItem value="ADMIN">Administrador (ADMIN)</SelectItem>
+                      <SelectItem value="SUPERADMIN">Super Administrador (SUPERADMIN)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Creando...' : 'Crear Usuario'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        </div>
       )}
     </div>
   );
