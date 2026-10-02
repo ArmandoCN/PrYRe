@@ -21,5 +21,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       }
     }
+  },
+  build: {
+    target: 'es2015'
   }
 });
