@@ -1,14 +1,14 @@
 # TECHNICAL ANNEX: DEVIATIONS FROM ORIGINAL PLAN AND CURRENT STATE
 
 **LAST UPDATED:** 2026-10-02
-**OBJECTIVE:** To document in a structured format (Machine and Human-readable) the final state of the Architecture, Database, and Frontend after implementing Phases 3 and 4, highlighting design modifications over the original Product Requirements Document (PRD).
+**OBJECTIVE:** To document in a structured format (Machine and Human-readable) the final state of the Architecture, Database, and Frontend after all phases, highlighting design modifications over the original Product Requirements Document (PRD). This document acts as the ultimate source of truth prioritized over legacy PRDs.
 
 ---
 
 ## 1. BACKEND ARCHITECTURE (CURRENT STATE)
 - **Architectural Pattern:** Evolved from a classic MVC (Model-View-Controller) scheme to **Clean Architecture / Domain-Driven Design (DDD)**.
 - **Implementation:** 
-  - Explicit *UseCases* are utilized (e.g., `ManageFormConfigUseCase`, `SubmitFormUseCase`, `ManageUsersUseCase`) to isolate core business logic.
+  - Explicit *UseCases* are utilized (e.g., `ManageFormConfigUseCase`, `SubmitFormUseCase`, `ReserveFormSpotUseCase`) to isolate core business logic.
   - **Dependency Injection (DI):** All controllers receive their use cases via constructor injection, and use cases receive their database repositories. This decouples Prisma from the controller layer.
 - **Prisma ORM:** Stabilized on **Prisma v5** (avoiding experimental edge/v6 features). Dynamic model queries (e.g., `this.prismaClient[formIdentifier]`) are executed enforcing a strict key mapping rule (`lowerCamelCase`).
 
@@ -23,20 +23,24 @@
 - A new table `UserFormAccess` acts as a pivot linking a `UserId` to a specific `form_identifier`.
 - Express Middleware (`auth.ts`) dynamically intercepts requests to `/api/forms/:form_identifier/*`, querying the pivot table to authorize or reject `ADMIN` and `ANALYST` requests globally before reaching controllers.
 
-## 3. DATA MODEL MODIFICATIONS (`FormConfig` and Reservations)
+## 3. DATA MODEL MODIFICATIONS (`FormConfig`, Folios, and Reservations)
 ### 3.1. Separation of Visibility and Security
 - **Original Plan:** A form was activated/deactivated or made public/private using a single boolean flag.
 - **Current Implementation (Deviation):** 
   - `is_active` (Boolean): Defines if the form accepts or rejects incoming submissions (`POST`).
   - `is_listed` (Boolean): Defines if the form appears in the public directory on the main portal page (`/`).
-  - `public_password` (String?): Handles password authentication. A form can be listed, active, and require a password simultaneously; or it can be "secret" (unlisted) but active for direct links.
+  - `public_password` (String?): Handles password authentication. A form can be listed, active, and require a password simultaneously.
 
 ### 3.2. Capacity Management & Expiration (Reservations)
-- Forms now support a `max_submissions` limit.
+- Forms now support a `max_submissions` limit and a `reservation_window_minutes`.
 - The system employs a state-machine for seats: `PENDING` (Reserved) and `COMPLETED`.
 - A background chronjob/interval natively expires `PENDING` reservations after a `expires_at` threshold, returning the seat to the pool safely avoiding race conditions. 
 
-### 3.3. Confirmation Modes
+### 3.3. Folio Generation System
+- The system implements a dedicated `FolioGeneratorService` injecting unique IDs into `payload.folio` upon submission.
+- **Strategies Supported:** `NONE`, `CONSECUTIVE` (e.g., 0001), `PREFIX_DATE_CONSECUTIVE` (e.g., EV-261002-0001), and `RANDOM_CHECKSUM` (e.g., A4F2B7).
+
+### 3.4. Confirmation Modes
 - **Original Plan:** Display a static success message upon submission.
 - **Current Implementation (Deviation):** Introduced the `confirmation_mode` field (Enum) in the `FormConfig` table.
   - `SIMPLE`: Displays the default success message in a styled modal.
@@ -57,6 +61,6 @@
 - Booleans are transformed into styled visual badges (`Yes` / `No`).
 
 ### 4.3. Added Interface Features
-1. **Client-Side Exports:** Instead of round-tripping to the server, lightweight client-side libraries (`xlsx`, `jspdf`, `jspdf-autotable`) export the *currently filtered state* directly from the browser's RAM to the user's local disk.
-2. **Dual Search System:** Features an inclusive global search (`GlobalSearch`) paired with individualized column-header filters (Toggleable via a dedicated UI switch to avoid visual clutter).
-3. **Soft Bulk-Delete:** Added global checkboxes. Executes asynchronous bursts of logical deletions (`deleted_at`) mapped over selected identifiers to maintain data protection policies.
+1. **Client-Side Exports:** Lightweight client-side libraries (`xlsx`, `jspdf`, `jspdf-autotable`) export the *currently filtered state* directly from the browser's RAM to the user's local disk.
+2. **Dual Search System:** Features an inclusive global search (`GlobalSearch`) paired with individualized column-header filters.
+3. **Soft Bulk-Delete:** Added global checkboxes. Executes asynchronous bursts of logical deletions (`deleted_at`).
