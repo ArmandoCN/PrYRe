@@ -27,7 +27,7 @@ export function AdminDashboard() {
         axios.get('/api/auth/me'),
         axios.get('/api/forms')
       ]);
-      setUserRole(meRes.data.data.role);
+      setUserRole(meRes.data.data.user.role);
       setForms(formsRes.data.data);
     } catch (err: any) {
       if (err.response?.status === 401 || err.response?.status === 403) {
