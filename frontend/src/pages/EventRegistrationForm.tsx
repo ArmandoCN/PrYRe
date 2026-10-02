@@ -62,12 +62,36 @@ export function EventRegistrationForm() {
     if (isSoldOut || reservationToken) return; // Prevent double firing
 
     const reserveSpot = async () => {
+      const LOCAL_KEY = 'pryre_res_EventRegistration';
+      
       try {
+        // 1. Check local storage first
+        const savedRes = localStorage.getItem(LOCAL_KEY);
+        if (savedRes) {
+          const parsed = JSON.parse(savedRes);
+          if (new Date(parsed.expires_at) > new Date()) {
+            // Still valid, reuse it
+            setReservationToken(parsed.reservation_token);
+            setExpiresAt(new Date(parsed.expires_at));
+            setHasLimit(parsed.has_limit);
+            return;
+          } else {
+            // Expired, clear it
+            localStorage.removeItem(LOCAL_KEY);
+          }
+        }
+
+        // 2. If no valid reservation, request a new one
         const response = await axios.post('/api/forms/EventRegistration/reserve');
         if (response.data.success) {
-          setReservationToken(response.data.data.reservation_token);
-          setExpiresAt(new Date(response.data.data.expires_at));
-          setHasLimit(response.data.data.has_limit);
+          const resData = response.data.data;
+          setReservationToken(resData.reservation_token);
+          setExpiresAt(new Date(resData.expires_at));
+          setHasLimit(resData.has_limit);
+          
+          if (resData.reservation_token) {
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(resData));
+          }
         }
       } catch (err: any) {
         if (err.response?.data?.error?.code === 'LIMIT_REACHED') {
@@ -124,10 +148,12 @@ export function EventRegistrationForm() {
       
       setFinalFolio(res.data.data.folio);
       setSuccess(true);
+      localStorage.removeItem('pryre_res_EventRegistration');
     } catch (error: any) {
       console.error(error);
       const msg = error.response?.data?.error?.message;
       if (msg === 'RESERVATION_EXPIRED') {
+        localStorage.removeItem('pryre_res_EventRegistration');
         alert('Tu tiempo de reserva ha expirado. Por favor, recarga la página para intentar de nuevo.');
       } else {
         alert('Error al enviar el formulario. Verifica tus datos o contacta al administrador.');
