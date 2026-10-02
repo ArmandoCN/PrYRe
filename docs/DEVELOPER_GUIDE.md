@@ -65,3 +65,14 @@ Create a validation file `src/lib/validations/jobApplication.ts`.
 Add the route mapping the identifier to the component: `<Route path="/forms/JobApplication" element={<JobApplicationForm />} />`.
 
 **NOTE ON DATA VIEWER:** You DO NOT need to build a data viewer or admin panel for your new form. The `FormSubmissionsView.tsx` component is dynamically universal. As long as you followed the naming conventions, navigating to `/admin/forms/JobApplication/data` will automatically render a fully functional table, export engine (PDF/XLSX), and bulk-delete system for your new form.
+
+### STEP 1.5: Register the Form in the Database
+You MUST insert a base record into the `FormConfig` table for the new form so the Admin Panel can control it.
+Update `backend/seed.js` (or run a direct query) to create it:
+```javascript
+await prisma.formConfig.upsert({
+  where: { form_identifier: 'JobApplication' },
+  update: {},
+  create: { form_identifier: 'JobApplication', is_active: true, is_listed: true },
+});
+```
