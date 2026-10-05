@@ -40,7 +40,7 @@ If you (the LLM) are tasked with creating a new form (e.g., `JobApplication`), s
 ### STEP 1: Backend Database Schema (`prisma/schema.prisma`)
 Add a new model for the form.
 1. It MUST have these 4 base fields: `id` (String UUID), `created_at` (DateTime), `updated_at` (DateTime), `deleted_at` (DateTime?).
-2. Name the model in PascalCase (e.g., `model JobApplication`).
+2. Name the model in PascalCase and it MUST exactly match the `form_identifier` (e.g., `model JobApplication`).
 3. Add the business fields.
 4. Run `npx prisma generate && npx prisma db push`.
 
@@ -69,7 +69,7 @@ Create a validation file `src/lib/validations/jobApplication.ts`.
 4. **Password Wall:** If `requiresPassword` is true, render a password lock screen *before* revealing the main form.
 5. **Data Transformation (CRITICAL):** In your `onSubmit(data)` handler, before sending to Axios:
    - You MUST transform all date strings to ISO-8601 strictly. Example: `birthdate: new Date(data.birthdate).toISOString()`. Prisma will crash otherwise.
-   - You MUST wrap the payload in this structure: `{ payload: { ...transformedData }, public_password: passwordInput, reservation_token: reservationToken }`.
+   - You MUST wrap the payload in this structure: `{ data: { ...transformedData }, public_password: passwordInput, reservation_token: reservationToken }`.
 6. **Success Handling:** Clear the `localStorage` reservation token. Map behavior to `confirmationMode`:
    - `TICKET`: Redirect to `/forms/JobApplication/ticket?code=XYZ`.
    - `CODE`: Render a success UI with a generated confirmation code.

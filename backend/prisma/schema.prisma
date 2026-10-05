@@ -191,3 +191,43 @@ model EventRegistration {
   // Autorización e Indicaciones
   accepts_image_usage Boolean
 }
+
+enum PrepaModality {
+  ESCOLARIZADA
+  ABIERTA
+}
+
+enum PrepaShift {
+  MATUTINO
+  VESPERTINO
+  SABATINO
+}
+
+model PrepaStase {
+  id              String   @id @default(uuid()) @db.Uuid
+  folio           String?  @unique
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  deleted_at      DateTime?
+
+  // Datos Personales
+  full_name       String
+  birthdate       DateTime
+  neighborhood    String
+  phone           String
+  email           String?
+
+  // Datos del Tutor
+  tutor_name      String?
+  tutor_phone     String?
+
+  // Datos Académicos y de Interés
+  last_grade      String
+  last_school     String
+  modality        PrepaModality
+  shift           PrepaShift
+  
+  // Metadatos
+  contact_methods String[]
+  notes           String?
+}

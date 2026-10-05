@@ -35,6 +35,20 @@ async function main() {
 
   console.log('Seed exitoso: admin@example.com / admin123');
   console.log('Formulario EventRegistration creado y activado.');
+
+  await prisma.formConfig.upsert({
+    where: { form_identifier: 'PrepaStase' },
+    update: {},
+    create: {
+      form_identifier: 'PrepaStase',
+      is_active: true,
+      is_listed: true,
+      folio_strategy: 'CONSECUTIVE',
+      folio_prefix: 'PREP'
+    },
+  });
+  console.log('Formulario PrepaStase creado y activado.');
+
 }
 
 main()
