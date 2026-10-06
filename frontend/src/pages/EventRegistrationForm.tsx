@@ -15,7 +15,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
@@ -311,18 +310,16 @@ export function EventRegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Actividad</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="HORA_DEL_CUENTO">Hora del Cuento</SelectItem>
-                            <SelectItem value="CIRCULO_DE_LECTURA">Círculo de Lectura</SelectItem>
-                            <SelectItem value="TALLER">Taller</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="HORA_DEL_CUENTO">Hora del Cuento</option>
+                        <option value="CIRCULO_DE_LECTURA">Círculo de Lectura</option>
+                        <option value="TALLER">Taller</option>
+                      </select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -382,17 +379,15 @@ export function EventRegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Género</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="H">Hombre</SelectItem>
-                            <SelectItem value="M">Mujer</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="H">Hombre</option>
+                        <option value="M">Mujer</option>
+                      </select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -449,20 +444,18 @@ export function EventRegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ocupación</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="HOGAR">Hogar</SelectItem>
-                            <SelectItem value="ESTUDIANTE">Estudiante</SelectItem>
-                            <SelectItem value="TRABAJADOR">Trabajador</SelectItem>
-                            <SelectItem value="JUBILADO">Jubilado</SelectItem>
-                            <SelectItem value="DESOCUPADO">Desocupado</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="HOGAR">Hogar</option>
+                        <option value="ESTUDIANTE">Estudiante</option>
+                        <option value="TRABAJADOR">Trabajador</option>
+                        <option value="JUBILADO">Jubilado</option>
+                        <option value="DESOCUPADO">Desocupado</option>
+                      </select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -474,21 +467,19 @@ export function EventRegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Nivel de Estudios</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="PREESCOLAR">Preescolar</SelectItem>
-                            <SelectItem value="PRIMARIA">Primaria</SelectItem>
-                            <SelectItem value="SECUNDARIA">Secundaria</SelectItem>
-                            <SelectItem value="BACHILLERATO">Bachillerato</SelectItem>
-                            <SelectItem value="LICENCIATURA">Licenciatura</SelectItem>
-                            <SelectItem value="POSGRADO">Posgrado</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="PREESCOLAR">Preescolar</option>
+                        <option value="PRIMARIA">Primaria</option>
+                        <option value="SECUNDARIA">Secundaria</option>
+                        <option value="BACHILLERATO">Bachillerato</option>
+                        <option value="LICENCIATURA">Licenciatura</option>
+                        <option value="POSGRADO">Posgrado</option>
+                      </select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -557,20 +548,18 @@ export function EventRegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Relación</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="PADRE">Padre</SelectItem>
-                            <SelectItem value="MADRE">Madre</SelectItem>
-                            <SelectItem value="TUTOR">Tutor</SelectItem>
-                            <SelectItem value="OTRO_FAMILIAR">Otro Familiar</SelectItem>
-                            <SelectItem value="OTRO">Otro</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="PADRE">Padre</option>
+                        <option value="MADRE">Madre</option>
+                        <option value="TUTOR">Tutor</option>
+                        <option value="OTRO_FAMILIAR">Otro Familiar</option>
+                        <option value="OTRO">Otro</option>
+                      </select>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -629,20 +618,18 @@ export function EventRegistrationForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Relación</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecciona..." />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="PADRE">Padre</SelectItem>
-                            <SelectItem value="MADRE">Madre</SelectItem>
-                            <SelectItem value="TUTOR">Tutor</SelectItem>
-                            <SelectItem value="OTRO_FAMILIAR">Otro Familiar</SelectItem>
-                            <SelectItem value="OTRO">Otro</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="PADRE">Padre</option>
+                        <option value="MADRE">Madre</option>
+                        <option value="TUTOR">Tutor</option>
+                        <option value="OTRO_FAMILIAR">Otro Familiar</option>
+                        <option value="OTRO">Otro</option>
+                      </select>
                         <FormMessage />
                       </FormItem>
                     )}

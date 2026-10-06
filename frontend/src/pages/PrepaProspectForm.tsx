@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const DEFAULT_CONTACT_OPTIONS = ['Facebook', 'WhatsApp', 'Página Web', 'Volante', 'Recomendación'];
@@ -293,8 +292,10 @@ export function PrepaProspectForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Último Grado *</FormLabel>
-                      <Select 
-                        onValueChange={(val) => {
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => {
+                          const val = e.target.value;
                           setLastGradeOption(val);
                           if (val !== 'Cursando Prepa' && val !== 'Otro' && val !== 'Prepa Abandonada') {
                             field.onChange(val);
@@ -302,19 +303,14 @@ export function PrepaProspectForm() {
                             field.onChange(`${val}: ${lastGradeText}`);
                           }
                         }}
+                        defaultValue=""
                       >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Secundaria Terminada">Secundaria Terminada</SelectItem>
-                          <SelectItem value="Prepa Abandonada">Prepa Abandonada</SelectItem>
-                          <SelectItem value="Cursando Prepa">Cursando Prepa</SelectItem>
-                          <SelectItem value="Otro">Otro</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="Secundaria Terminada">Secundaria Terminada</option>
+                        <option value="Prepa Abandonada">Prepa Abandonada</option>
+                        <option value="Cursando Prepa">Cursando Prepa</option>
+                        <option value="Otro">Otro</option>
+                      </select>
                       {(lastGradeOption === 'Cursando Prepa' || lastGradeOption === 'Otro' || lastGradeOption === 'Prepa Abandonada') && (
                         <div className="mt-2">
                            <Input 
@@ -350,17 +346,15 @@ export function PrepaProspectForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Modalidad *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="ESCOLARIZADA">Escolarizada</SelectItem>
-                          <SelectItem value="ABIERTA">Abierta</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="ESCOLARIZADA">Escolarizada</option>
+                        <option value="ABIERTA">Abierta</option>
+                      </select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -371,18 +365,16 @@ export function PrepaProspectForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Turno *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="MATUTINO">Matutino</SelectItem>
-                          <SelectItem value="VESPERTINO">Vespertino</SelectItem>
-                          <SelectItem value="SABATINO">Sabatino</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        onChange={(e) => field.onChange(e.target.value)} 
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Selecciona...</option>
+                        <option value="MATUTINO">Matutino</option>
+                        <option value="VESPERTINO">Vespertino</option>
+                        <option value="SABATINO">Sabatino</option>
+                      </select>
                       <FormMessage />
                     </FormItem>
                   )}
