@@ -1,8 +1,14 @@
 import * as z from 'zod';
+import { isValidDateDDMMYY, parseDateToDateObj } from '../locale';
 
 export const prepaProspectSchema = z.object({
   full_name: z.string().min(3, "El nombre completo es obligatorio"),
-  birthdate: z.string().min(1, "La fecha de nacimiento es obligatoria"),
+  birthdate: z
+    .string()
+    .min(1, "La fecha de nacimiento es obligatoria (DD/MM/AA)")
+    .refine((val) => isValidDateDDMMYY(val), {
+      message: "Fecha inválida. Usa el formato DD/MM/AA",
+    }),
   neighborhood: z.string().min(1, "La colonia es obligatoria"),
   phone: z.string().min(10, "El teléfono debe tener al menos 10 dígitos").max(20, "Número demasiado largo"),
   email: z.string().email("Correo inválido").optional().or(z.literal('')),
@@ -23,10 +29,9 @@ export const prepaProspectSchema = z.object({
   contact_methods: z.array(z.string()).min(1, "Selecciona al menos un medio de contacto"),
   notes: z.string().optional(),
 }).superRefine((data, ctx) => {
-  // Calculamos la edad
-  const birthDateObj = new Date(data.birthdate);
-  // Prevent invalid dates from crashing the age check
-  if (isNaN(birthDateObj.getTime())) return;
+  // Calculamos la edad usando el parser DD/MM/AA
+  const birthDateObj = parseDateToDateObj(data.birthdate);
+  if (!birthDateObj) return;
 
   const ageDifMs = Date.now() - birthDateObj.getTime();
   const ageDate = new Date(ageDifMs);

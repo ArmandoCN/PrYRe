@@ -57,7 +57,7 @@ await prisma.formConfig.upsert({
 
 ### STEP 2: Zod Validation Schema (Frontend)
 Create a validation file `src/lib/validations/jobApplication.ts`.
-- Form inputs mapped to Prisma `DateTime` MUST be declared as `z.string().min(1)` in the frontend. (HTML `<input type="date">` produces strings).
+- Form inputs mapped to Prisma `DateTime` MUST use the `DD/MM/AA` date format (`isValidDateInput` / `z.string().min(1)`).
 - Enum fields in Prisma MUST be mapped using `z.enum([...])`.
 
 ### STEP 3: Frontend Component Layout (`src/pages/JobApplicationForm.tsx`)
@@ -65,10 +65,10 @@ Create a validation file `src/lib/validations/jobApplication.ts`.
 2. **Capacity & Reservations (CRITICAL):** If `maxSubmissions > 0`, you MUST call `POST /api/forms/JobApplication/reserve` when the component mounts to reserve a spot. 
    - Generate a UUID `reservationToken` and store it in `localStorage` alongside its expiration time to recover it on accidental tab close.
    - If `/reserve` returns `409 Conflict`, render a "Form is Full" message.
-3. **Form Render:** Use Shadcn UI `<Form>` wrappers. Render `<FormField>` for every input.
+3. **Form Render & Date Format (`DD/MM/AA` MANDATORY):** Use Shadcn UI `<Form>` wrappers. Render `<FormField>` for every input. All date inputs MUST use `<DateInputDDMMYY />` (`DD/MM/AA`), and all displayed dates MUST use `formatDateMX()` (`DD/MM/AA`).
 4. **Password Wall:** If `requiresPassword` is true, render a password lock screen *before* revealing the main form.
 5. **Data Transformation (CRITICAL):** In your `onSubmit(data)` handler, before sending to Axios:
-   - You MUST transform all date strings to ISO-8601 strictly. Example: `birthdate: new Date(data.birthdate).toISOString()`. Prisma will crash otherwise.
+   - You MUST transform all `DD/MM/AA` date strings to ISO-8601 strictly using `parseDateToISO(data.birthdate)` from `src/lib/locale.ts`. Prisma will crash otherwise.
    - You MUST wrap the payload in this structure: `{ data: { ...transformedData }, public_password: passwordInput, reservation_token: reservationToken }`.
 6. **Success Handling:** Clear the `localStorage` reservation token. Map behavior to `confirmationMode`:
    - `TICKET`: Redirect to `/forms/JobApplication/ticket?code=XYZ`.

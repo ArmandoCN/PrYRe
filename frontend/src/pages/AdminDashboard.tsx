@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
 export function AdminDashboard() {
@@ -193,19 +192,15 @@ export function AdminDashboard() {
                       Define qué sucede después de enviar el registro.
                     </p>
                   </div>
-                  <Select 
+                  <select 
+                    className="flex h-10 w-full mt-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={form.confirmation_mode || 'SIMPLE'} 
-                    onValueChange={(val) => updateConfirmationMode(form.form_identifier, val)}
+                    onChange={(e) => updateConfirmationMode(form.form_identifier, e.target.value)}
                   >
-                    <SelectTrigger className="w-full mt-2">
-                      <SelectValue placeholder="Selecciona un modo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SIMPLE">Mensaje Simple</SelectItem>
-                      <SelectItem value="CODE">Código Único (Folio)</SelectItem>
-                      <SelectItem value="TICKET">Comprobante Imprimible (Boleto)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="SIMPLE">Mensaje Simple</option>
+                    <option value="CODE">Código Único (Folio)</option>
+                    <option value="TICKET">Comprobante Imprimible (Boleto)</option>
+                  </select>
                 </div>
 
                 <div className="flex flex-col space-y-2 mt-4 pt-4 border-t">
@@ -215,26 +210,22 @@ export function AdminDashboard() {
                       Cómo se genera el número de folio/ticket.
                     </p>
                   </div>
-                  <Select 
+                  <select 
+                    className="flex h-10 w-full mt-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={form.folio_strategy || 'RANDOM_CHECKSUM'} 
-                    onValueChange={(val) => updateFolioStrategy(form.form_identifier, val)}
+                    onChange={(e) => updateFolioStrategy(form.form_identifier, e.target.value)}
                     disabled={form.confirmation_mode === 'SIMPLE'}
                   >
-                    <SelectTrigger className="w-full mt-2">
-                      <SelectValue placeholder="Selecciona estrategia" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="NONE">Ninguna</SelectItem>
-                      <SelectItem value="CONSECUTIVE">Consecutivo Numérico (1, 2, 3...)</SelectItem>
-                      <SelectItem value="PREFIX_DATE_CONSECUTIVE">Prefijo + Fecha (EJ: 2410-001)</SelectItem>
-                      <SelectItem value="RANDOM_CHECKSUM">Alfanumérico Seguro (EJ: X9P2K)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="NONE">Ninguna</option>
+                    <option value="CONSECUTIVE">Consecutivo Numérico (1, 2, 3...)</option>
+                    <option value="PREFIX_DATE_CONSECUTIVE">Prefijo + Fecha (EJ: 2410-001)</option>
+                    <option value="RANDOM_CHECKSUM">Alfanumérico Seguro (EJ: X9P2K)</option>
+                  </select>
                 </div>
 
               </CardContent>
               <CardFooter className="flex justify-between border-t p-4">
-                <Link to={`/forms/${form.form_identifier}`}>
+                <Link to={form.form_identifier === 'ActivityCatalog' ? '/forms/ActivityParticipant' : `/forms/${form.form_identifier}`}>
                   <Button variant="outline" size="sm">Ver Form</Button>
                 </Link>
                 <Link to={`/admin/forms/${form.form_identifier}/data`}>

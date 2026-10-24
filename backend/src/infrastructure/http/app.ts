@@ -62,6 +62,7 @@ import { UserController } from './controllers/UserController';
 const manageUsersUseCase = new ManageUsersUseCase();
 const userController = new UserController(manageUsersUseCase);
 
+import { GetActivityCatalogUseCase } from '../../application/GetActivityCatalogUseCase';
 const prismaSubmissionRepository = new PrismaSubmissionRepository(prismaClient);
 const prismaFormReservationRepository = new PrismaFormReservationRepository(prismaClient);
 
@@ -69,8 +70,15 @@ const submitFormUseCase = new SubmitFormUseCase(prismaFormConfigRepository, pris
 const softDeleteUseCase = new SoftDeleteSubmissionUseCase(prismaSubmissionRepository);
 const getSubmissionsUseCase = new GetSubmissionsUseCase(prismaFormConfigRepository, prismaSubmissionRepository);
 const reserveFormSpotUseCase = new ReserveFormSpotUseCase(prismaFormConfigRepository, prismaFormReservationRepository, prismaSubmissionRepository);
+const getActivityCatalogUseCase = new GetActivityCatalogUseCase(prismaSubmissionRepository);
 
-const submissionController = new SubmissionController(submitFormUseCase, softDeleteUseCase, getSubmissionsUseCase, reserveFormSpotUseCase);
+const submissionController = new SubmissionController(
+  submitFormUseCase,
+  softDeleteUseCase,
+  getSubmissionsUseCase,
+  reserveFormSpotUseCase,
+  getActivityCatalogUseCase
+);
 
 const prismaAssetRepository = new PrismaAssetRepository(prismaClient);
 const localFileStorageService = new LocalFileStorageService();
@@ -104,6 +112,10 @@ apiRouter.post('/auth/login', validate(loginSchema), (req, res) => authControlle
 apiRouter.get('/auth/me', requireAuth(), (req, res) => authController.getMe(req, res));
 apiRouter.post('/auth/change-password', requireAuth(), (req, res) => authController.changePassword(req, res));
 apiRouter.get('/public-forms', (req, res) => formConfigController.getPublicList(req, res));
+apiRouter.get('/activities/catalog', (req, res) => submissionController.getActivitiesCatalog(req, res));
+apiRouter.get('/activities/:activity_id/participants', (req, res) => submissionController.getActivityParticipants(req, res));
+apiRouter.post('/activities/:activity_id/participants/delete', (req, res) => submissionController.deleteActivityParticipants(req, res));
+apiRouter.patch('/activities/:activity_id', (req, res) => submissionController.updateActivity(req, res));
 apiRouter.get('/forms', requireAuth(['SUPERADMIN', 'ADMIN', 'ANALYST']), (req, res) => formConfigController.getAll(req, res));
 apiRouter.get('/forms/:form_identifier/config', (req, res) => formConfigController.getConfig(req, res));
 apiRouter.patch('/forms/:form_identifier/config', requireAuth(['SUPERADMIN', 'ADMIN'], true), validate(updateFormConfigSchema), (req, res) => formConfigController.updateConfig(req, res));

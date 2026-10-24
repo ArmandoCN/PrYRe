@@ -1,13 +1,20 @@
 import { z } from 'zod';
+import { isValidDateDDMMYY } from '../locale';
 
 export const eventRegistrationSchema = z.object({
   // Información General
   activity: z.enum(['HORA_DEL_CUENTO', 'CIRCULO_DE_LECTURA', 'TALLER'], { required_error: 'La actividad es obligatoria' }),
-  activity_date: z.string({ required_error: 'La fecha es obligatoria' }).min(1, 'La fecha es obligatoria'),
+  activity_date: z
+    .string({ required_error: 'La fecha es obligatoria (DD/MM/AA)' })
+    .min(1, 'La fecha es obligatoria (DD/MM/AA)')
+    .refine((val) => isValidDateDDMMYY(val), { message: 'Fecha inválida. Usa el formato DD/MM/AA' }),
 
   // Información del Participante
   participant_name: z.string().min(1, 'El nombre es obligatorio'),
-  participant_birthdate: z.string({ required_error: 'La fecha de nacimiento es obligatoria' }).min(1, 'La fecha de nacimiento es obligatoria'),
+  participant_birthdate: z
+    .string({ required_error: 'La fecha de nacimiento es obligatoria (DD/MM/AA)' })
+    .min(1, 'La fecha de nacimiento es obligatoria (DD/MM/AA)')
+    .refine((val) => isValidDateDDMMYY(val), { message: 'Fecha inválida. Usa el formato DD/MM/AA' }),
   participant_gender: z.enum(['H', 'M'], { required_error: 'El género es obligatorio' }),
   participant_email: z.string().email('Correo inválido').optional().or(z.literal('')),
   participant_phone: z.string().optional(),

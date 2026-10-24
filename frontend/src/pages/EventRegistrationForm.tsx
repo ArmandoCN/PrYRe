@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 
 import { eventRegistrationSchema, type EventRegistrationFormValues } from '../lib/validations/eventRegistration';
+import { parseDateToISO } from '../lib/locale';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { DateInputDDMMYY } from '@/components/ui/date-input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
@@ -132,11 +134,11 @@ export function EventRegistrationForm() {
   async function onSubmit(data: EventRegistrationFormValues) {
     setIsSubmitting(true);
     try {
-      // Cast date strings to valid ISO-8601 for Prisma
+      // Cast DD/MM/AA date strings to valid ISO-8601 for Prisma
       const payloadData = {
         ...data,
-        activity_date: new Date(data.activity_date).toISOString(),
-        participant_birthdate: new Date(data.participant_birthdate).toISOString()
+        activity_date: parseDateToISO(data.activity_date),
+        participant_birthdate: parseDateToISO(data.participant_birthdate)
       };
 
       const res = await axios.post('/api/forms/EventRegistration/submissions', { 
@@ -330,9 +332,16 @@ export function EventRegistrationForm() {
                     name="activity_date"
                     render={({ field }) => (
                       <FormItem className="flex flex-col mt-2">
-                        <FormLabel>Fecha</FormLabel>
+                        <FormLabel>Fecha (DD/MM/AA)</FormLabel>
                         <FormControl>
-                          <Input type="date" lang="es-MX" {...field} />
+                          <DateInputDDMMYY
+                            className="h-10"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -364,9 +373,16 @@ export function EventRegistrationForm() {
                     name="participant_birthdate"
                     render={({ field }) => (
                       <FormItem className="flex flex-col mt-2">
-                        <FormLabel>Fecha de Nacimiento</FormLabel>
+                        <FormLabel>Fecha de Nacimiento (DD/MM/AA)</FormLabel>
                         <FormControl>
-                          <Input type="date" lang="es-MX" {...field} />
+                          <DateInputDDMMYY
+                            className="h-10"
+                            value={field.value}
+                            onChange={field.onChange}
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            ref={field.ref}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

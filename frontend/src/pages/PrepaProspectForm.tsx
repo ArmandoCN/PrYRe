@@ -3,9 +3,11 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { prepaProspectSchema, type PrepaProspectData } from '@/lib/validations/prepaProspect';
+import { parseDateToDateObj, parseDateToISO } from '@/lib/locale';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { DateInputDDMMYY } from '@/components/ui/date-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -48,8 +50,8 @@ export function PrepaProspectForm() {
 
   useEffect(() => {
     if (birthdateValue) {
-      const birthDateObj = new Date(birthdateValue);
-      if (!isNaN(birthDateObj.getTime())) {
+      const birthDateObj = parseDateToDateObj(birthdateValue);
+      if (birthDateObj) {
         const ageDifMs = Date.now() - birthDateObj.getTime();
         const ageDate = new Date(ageDifMs);
         const age = Math.abs(ageDate.getUTCFullYear() - 1970);
@@ -108,7 +110,7 @@ export function PrepaProspectForm() {
 
       const transformedData = {
         ...data,
-        birthdate: new Date(data.birthdate).toISOString(),
+        birthdate: parseDateToISO(data.birthdate),
         contact_methods: finalContactMethods,
       };
 
@@ -187,7 +189,7 @@ export function PrepaProspectForm() {
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex justify-between items-center mb-1">
-                        <FormLabel>Fecha de Nacimiento *</FormLabel>
+                        <FormLabel>Fecha de Nacimiento (DD/MM/AA) *</FormLabel>
                         {!isMinor && (
                           <Button 
                             type="button" 
@@ -201,7 +203,14 @@ export function PrepaProspectForm() {
                         )}
                       </div>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <DateInputDDMMYY
+                          className="h-10"
+                          value={field.value}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home } from './pages/Home';
 import { EventRegistrationForm } from './pages/EventRegistrationForm';
 import { PrepaProspectForm } from './pages/PrepaProspectForm';
+import { ActivityParticipantForm } from './pages/ActivityParticipantForm';
 import { TicketView } from './pages/TicketView';
 import { Login } from './pages/Login';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -16,8 +17,10 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/forms/EventRegistration" element={<EventRegistrationForm />} />
         <Route path="/forms/EventRegistration/ticket" element={<TicketView />} />
+        <Route path="/forms/:form_identifier/ticket" element={<TicketView />} />
         
         <Route path="/forms/PrepaStase" element={<PrepaProspectForm />} />
+        <Route path="/forms/ActivityParticipant" element={<ActivityParticipantForm />} />
         
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin/dashboard" element={

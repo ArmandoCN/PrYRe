@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { formatDateTimeMX } from '../lib/locale';
+import { formatDateMX, formatDateTimeMX } from '../lib/locale';
 
 import {
   Table,
@@ -21,11 +21,17 @@ import { Input } from '@/components/ui/input';
 
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
 
-function formatValue(val: any): string {
+function formatValue(val: any, key?: string): string {
   if (val === null || val === undefined || val === '') {
     return '';
   }
   if (typeof val === 'string' && isoDateRegex.test(val)) {
+    if (
+      (key && (key.includes('date') || key.includes('birthdate'))) ||
+      /T(00|12):00:00(\.000)?Z$/.test(val)
+    ) {
+      return formatDateMX(val);
+    }
     return formatDateTimeMX(val);
   }
   if (typeof val === 'boolean') {
@@ -72,7 +78,7 @@ export function FormSubmissionsView() {
   const columns = useMemo(() => {
     if (submissions.length === 0) return [];
     
-    const internalKeys = ['id', 'updated_at', 'deleted_at'];
+    const internalKeys = ['id', 'updated_at', 'deleted_at', 'activity_id'];
     
     let maxKeysObj = submissions[0];
     submissions.forEach(sub => {
@@ -103,8 +109,8 @@ export function FormSubmissionsView() {
     if (globalSearch.trim()) {
       const lowerSearch = globalSearch.toLowerCase();
       result = result.filter(sub => {
-        return Object.values(sub).some(val => 
-          formatValue(val).toLowerCase().includes(lowerSearch)
+        return Object.entries(sub).some(([k, val]) => 
+          formatValue(val, k).toLowerCase().includes(lowerSearch)
         );
       });
     }
@@ -114,7 +120,7 @@ export function FormSubmissionsView() {
         if (filterValue.trim()) {
           const lowerFilter = filterValue.toLowerCase();
           result = result.filter(sub => {
-            const val = formatValue(sub[key]);
+            const val = formatValue(sub[key], key);
             return val.toLowerCase().includes(lowerFilter);
           });
         }
@@ -168,7 +174,7 @@ export function FormSubmissionsView() {
     const exportData = filteredSubmissions.map(sub => {
       const row: any = {};
       columns.forEach(col => {
-        row[col.label] = formatValue(sub[col.key]);
+        row[col.label] = formatValue(sub[col.key], col.key);
       });
       return row;
     });
@@ -190,7 +196,7 @@ export function FormSubmissionsView() {
     
     const tableColumn = columns.map(c => c.label);
     const tableRows = filteredSubmissions.map(sub => {
-      return columns.map(col => formatValue(sub[col.key]));
+      return columns.map(col => formatValue(sub[col.key], col.key));
     });
 
     autoTable(doc, {
@@ -334,7 +340,7 @@ export function FormSubmissionsView() {
                           />
                         </TableCell>
                         {columns.map(col => {
-                          const displayValue = formatValue(sub[col.key]);
+                          const displayValue = formatValue(sub[col.key], col.key);
                           
                           if (typeof sub[col.key] === 'boolean') {
                             return (

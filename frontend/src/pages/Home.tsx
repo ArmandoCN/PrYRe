@@ -4,6 +4,35 @@ import axios from 'axios';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+interface FormMeta {
+  title: string;
+  badge: string;
+  description: string;
+}
+
+const FORM_METADATA: Record<string, FormMeta> = {
+  EventRegistration: {
+    title: 'Registro a Eventos Culturales',
+    badge: 'Eventos',
+    description: 'Inscripción para Hora del Cuento, Círculo de Lectura y Talleres.',
+  },
+  PrepaStase: {
+    title: 'Preinscripción Prepa STASE',
+    badge: 'Educación',
+    description: 'Registro de prospectos e interesados en cursar el bachillerato.',
+  },
+  ActivityCatalog: {
+    title: 'Alta de Actividades',
+    badge: 'Catálogo',
+    description: 'Registro de nuevas actividades con definición de fecha, cupo total y cupo reservado.',
+  },
+  ActivityParticipant: {
+    title: 'Participantes de Actividades',
+    badge: 'Inscripciones',
+    description: 'Registro de participantes por actividad con verificación de cupo disponible en tiempo real.',
+  },
+};
+
 export function Home() {
   const [publicForms, setPublicForms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,21 +69,34 @@ export function Home() {
           <div className="text-center">Cargando directorio...</div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {publicForms.map(form => (
-              <Card key={form.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle>{form.form_identifier}</CardTitle>
-                  <CardDescription>
-                    Formulario para registrar actividades y asistencia.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link to={`/forms/${form.form_identifier}`}>
-                    <Button className="w-full">Ir al Formulario</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+            {publicForms.map(form => {
+              const meta: FormMeta = FORM_METADATA[form.form_identifier] || {
+                title: form.form_identifier,
+                badge: 'General',
+                description: 'Formulario para registrar actividades y asistencia.',
+              };
+
+              return (
+                <Card key={form.id} className="hover:shadow-lg transition-shadow flex flex-col justify-between">
+                  <CardHeader className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                        {meta.badge}
+                      </span>
+                    </div>
+                    <CardTitle className="text-xl">{meta.title}</CardTitle>
+                    <CardDescription>
+                      {meta.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Link to={`/forms/${form.form_identifier}`}>
+                      <Button className="w-full">Ir al Formulario</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
             
             {publicForms.length === 0 && (
               <div className="col-span-full text-center py-10 text-muted-foreground">

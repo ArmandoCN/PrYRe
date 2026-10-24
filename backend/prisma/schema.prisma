@@ -231,3 +231,50 @@ model PrepaStase {
   contact_methods String[]
   notes           String?
 }
+
+model ActivityCatalog {
+  id                String    @id @default(uuid()) @db.Uuid
+  folio             String?   @unique
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  deleted_at        DateTime?
+
+  // Datos de la Actividad
+  activity_name     String
+  activity_date     DateTime
+  total_capacity    Int
+  reserved_capacity Int       @default(0)
+  real_capacity     Int
+
+  participants      ActivityParticipant[]
+}
+
+model ActivityParticipant {
+  id                    String          @id @default(uuid()) @db.Uuid
+  folio                 String?         @unique
+  created_at            DateTime        @default(now())
+  updated_at            DateTime        @updatedAt
+  deleted_at            DateTime?
+
+  // Relación con la Actividad
+  activity_id           String          @db.Uuid
+  activity              ActivityCatalog @relation(fields: [activity_id], references: [id])
+  activity_name         String
+
+  // Datos del Participante
+  participant_name      String
+  birthdate             DateTime
+  gender                Gender
+  needs_special_support Boolean         @default(false)
+
+  // Datos de Contacto y Tutor
+  tutor_name            String?
+  tutor_phone           String
+  secondary_phone       String?
+
+  // Notas extensas
+  notes                 String?
+
+  @@index([activity_id, deleted_at])
+}
+
